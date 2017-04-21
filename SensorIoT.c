@@ -219,7 +219,7 @@ void sendSamples(float * samplesX, float * samplesY, float * samplesZ){
 	subMuestreo_xxx(samplesZ, dataZ, factor);
 
 	int i = 0;
-	while(i < 50){
+	while(i < 2){
 		jelementsX[i] = json_object_new_double(dataX[i]);
 		jelementsY[i] = json_object_new_double(dataY[i]);
 		jelementsZ[i] = json_object_new_double(dataZ[i]);
