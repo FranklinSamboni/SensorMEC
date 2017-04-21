@@ -108,6 +108,7 @@ void checkingPPS();
 void sincronizarRtc();
 void checkingSYNC();
 void readAndSaveData();
+void clearBuffer(char * buffer, int ln);
 void sendMsg(char * process, char *component, char * msg, int last);
 void sendSamples(float * samplesX, float * samplesY, float * samplesZ);
 void readWithRTC();
@@ -449,7 +450,7 @@ void checkingSYNC(){
 void readAndSaveData(){
 
 	char buf[255] = {0};
-	char bufTime[15] = {0}, bufDate[10] = {0}, bufLat[15] = {0};
+	char bufTime[15] = {0}, bufDate[15] = {0}, bufLat[15] = {0};
 	int flag = 0;
 	int gps = 0;
 	int isData = 0;
@@ -475,13 +476,17 @@ void readAndSaveData(){
 			//clock_gettime(CLOCK_MONOTONIC, &start);
 
 			printf("\n ----- Senial pps ------- \n");
-
+			clearBuffer(buf,255);
 			gps = readUART(buf);
 			if(gps != -1){
 				while(gps != -1){
 					flag = 0;
 					//printBuffer(gps,buf);
 					if(isRMC(buf) == 1) {
+						clearBuffer(bufTime,15);
+						clearBuffer(bufDate,15);
+						clearBuffer(bufLat,15);
+
 						getTimeGps(bufTime,buf);
 						getDateGps(bufDate,buf);
 
@@ -490,6 +495,7 @@ void readAndSaveData(){
 						//bits = getLat(data.lat,buffer);
 						//bits = getLng(data.lng,buffer);
 					}
+					clearBuffer(buf,255);
 					gps = readUART(buf);
 				}
 				if(isData != -1){
@@ -541,6 +547,14 @@ void readAndSaveData(){
 		}
 	}
 
+}
+
+void clearBuffer(char * buffer, int ln){
+	int i = 0;
+	while(i < ln){
+		buffer[i] = 0;
+		i++;
+	}
 }
 
 void readWithRTC(int * sendNotification){
