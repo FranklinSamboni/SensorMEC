@@ -24,7 +24,7 @@
 /*
 arm-linux-gnueabihf-gcc SensorIoT.c -o /home/frank/workspace/SensorIoT/Degub/SensorIoT libs/SOCKET/socketlib.o  libs/SAC_FILES/sacsubc.o libs/RTC/rtc.o  libs/JSON_FILES/filesJ.o libs/GPS/gps.o libs/GPIO/gpio.o  libs/ADC/adc.o -lrt -l json*/
 /*
-arm-linux-gnueabihf-gcc -o filesJ.o -lrt -l json -c filesJ.c
+
  */
 
 
@@ -59,7 +59,7 @@ arm-linux-gnueabihf-gcc -o filesJ.o -lrt -l json -c filesJ.c
 #define SAMPLES_DIR_R "/home/debian/Sensor-IOT/SensorIoT/muestras"
 #define BILLION 1000000000L
 
-#define MAX_SPS 400
+#define MAX_SPS 200
 #define SPS 200
 #define DT 0.005
 
@@ -261,13 +261,16 @@ void loadingGpsData(){
 	time_t inicio, fin;
 	int diff = 0;
 	inicio = time(NULL);
-
+	printf("limpiando\n");
+	clearUartBuffer();
+	printf("termino limpieza\n");
 	while(1){
-		res = readUART(buf);
 
+		res = readUART(buf);
 		if(res != -1){
+			//printBuffer(res,buf);
 			inicio = time(NULL);
-			printBuffer(res,buf);
+
 			if(isGGA(buf) == 1){
 				if(getAlt(alt,buf) != -1) {
 					flag = 1;
@@ -287,7 +290,7 @@ void loadingGpsData(){
 					sprintf(sps,"%s",SPS);
 					adcJson(CORRECT_STATUS_COMPONENT,"ads1262 de 32 bits",sps,"");*/
 
-					sendMsg(PUT_LOCATION,GPS,"",1);
+					sendMsg(PUT_LOCATION,GPS,"-",1);
 					sleep(1);
 					break;
 				}
@@ -351,9 +354,15 @@ void sincronizarRtc(){
 
 	int count = 0;
 	int i = 0;
+
+	printf("limpiando\n");
+	clearUartBuffer();
+	printf("termino limpieza\n");
 	while(1){
 		if(getValue(&gpio26_PPS) == HIGH){
 			res = readUART(buf);
+			//printBuffer(res,buf);
+
 			if(res != -1){
 				if(isRmcStatusOk(buf) == 1){
 
@@ -416,7 +425,7 @@ void checkingSYNC(){
 					printf("fecha es : %s\n", fecha);
 
 					rtcJson(CORRECT_STATUS_COMPONENT,"DS3231",fecha,"");
-					sendMsg(PUT_RTC_DATE,RTC,"",1);
+					sendMsg(PUT_RTC_DATE,RTC,"-",1);
 					sleep(1);
 					break;
 				}
@@ -455,11 +464,13 @@ void readAndSaveData(){
 	int gps = 0;
 	int isData = 0;
 
+	int isGPS = 1;
+
 	int sendNotiPPS = 1;
 	int sendNotiSYNC = 1;
 
-	int nsocket = -1;
-	char bufSocket[255] = {0};
+	//int nsocket = -1;
+	//char bufSocket[255] = {0};
 
 	//uint64_t diff;
 	//struct timespec start, end;
@@ -467,17 +478,24 @@ void readAndSaveData(){
 	time_t inicio,fin;
 	double count_PPS = 0.0;
 
+
+
+	printf("limpiando\n");
+	clearUartBuffer();
+	printf("termino limpieza\n");
+
 	inicio = time(NULL);
-	int isGPS = 1;
+
 	while(1){
 
 		if(getValue(&gpio26_PPS) == HIGH){
 			inicio = time(NULL);
 			//clock_gettime(CLOCK_MONOTONIC, &start);
 
-			printf("\n ----- Senial pps ------- \n");
+			//printf("\n ----- Senial pps ------- \n");
 			clearBuffer(buf,255);
 			gps = readUART(buf);
+			//printBuffer(gps,buf);
 			if(gps != -1){
 				while(gps != -1){
 					flag = 0;
@@ -491,6 +509,8 @@ void readAndSaveData(){
 						getDateGps(bufDate,buf);
 
 						isData = getLat(bufLat,buf);
+						//printBuffer(gps,buf);
+						//printf("Fecha: %s - Tiempo: %s - Latitud %s\n", bufDate, bufTime,bufLat );
 						break;
 						//bits = getLat(data.lat,buffer);
 						//bits = getLng(data.lng,buffer);
@@ -531,12 +551,11 @@ void readAndSaveData(){
 		else{
 			fin = time(NULL);
 			count_PPS = difftime(fin,inicio);
-
 			if(flag == 1 || count_PPS > 2.0){
 			//if(flag == 1){
 				if(getValue(&gpio68_SYNC) == LOW){
 					//clock_gettime(CLOCK_MONOTONIC, &start);
-					printf("Low pps.\n");
+					//printf("Low pps.\n");
 					sendNotiPPS = 1;
 					readWithRTC(&sendNotiSYNC);
 					//clock_gettime(CLOCK_MONOTONIC, &end);
@@ -611,7 +630,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 
 	int count = 0;
 
-	printf("Capturando datos ADC\n");
+	//printf("Capturando datos ADC\n");
 	while (count<MAX_SPS){
 		//printf("inicio count %d\n", count);
 
@@ -649,7 +668,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	writeSac(strDepValues.npts,strDepValues.dataNumber,samplesY,strDepValues.dt,axisY,currentDirectoryY);
 	writeSac(strDepValues.npts,strDepValues.dataNumber,samplesZ,strDepValues.dt,axisZ,currentDirectoryZ);
 
-	printf("Termino camptura de datos ADC\n");
+	//printf("Termino camptura de datos ADC\n");
 
 	sendSamples(samplesX,samplesY,samplesZ);
 
@@ -686,6 +705,7 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int 
 	}
 
 	if(dir[0] == 0){
+		clearBuffer(dir,100);
 		sprintf(dir,"%s/%s/%s_%c%c_%s.sac",SAMPLES_DIR_R,date,date,time[0],time[1],axis);
 		initDataofSamples(date,time,isGPS);
 		createFile(dir);
@@ -696,7 +716,7 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int 
 		if(last == 1){
 			sendMsg(UPLOAD_FILES,ADC,dir,1);
 		}
-
+		clearBuffer(dir,100);
 		sprintf(dir,"%s/%s/%s_%c%c_%s.sac",SAMPLES_DIR_R,date,date,time[0],time[1],axis);
 		//sprintf(dir,"%s/%s/%s%s_%c%c%c%c%c%c.sac",SAMPLES_DIR_R,date,axis,date,time[0],time[1],time[2],time[3],time[4],time[5]);
 		initDataofSamples(date,time,isGPS);
@@ -831,7 +851,7 @@ void read_prueba_solo_pps(){
 		if(getValue(&gpio26_PPS) == HIGH){
 		//if(getValue(&gpio68_SYNC) == LOW){
 			gggg = gggg + 1;
-			printf("\nggggg es  %d \n", gggg);
+			//printf("\nggggg es  %d \n", gggg);
 			printf("\n ----- Senial pps ------- \n");
 			//writeI2C(0x0F,0x88);
 			reading_ADC = 1;

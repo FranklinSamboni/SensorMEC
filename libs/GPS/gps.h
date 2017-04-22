@@ -114,6 +114,7 @@
 	int getLat(char * buffer, char * GGA_NEMEA);
 	int getLng(char * buffer, char * GGA_NEMEA);
 	int getAlt(char * buffer, char * GGA_NEMEA);
+	void clearUartBuffer();
 
 
 #endif

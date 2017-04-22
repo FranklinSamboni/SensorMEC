@@ -63,7 +63,7 @@ int readUART(char * buf){
 	}
 	//printf("%s--\n", buf);
 	buf[resultado] = 0;
-	//printf("%s--\n", buf);
+	//printf("-%s-\n", buf);
 	return resultado;
 }
 
@@ -94,6 +94,15 @@ int closeUART(){
 	gps.device[3]=0;
 	return 1;
 
+}
+
+void clearUartBuffer(){
+	char recv[128] = {0};
+	int res = 0;
+	res = readUART(recv);
+	while(res != -1){
+		res = readUART(recv);
+	}
 }
 
 char checkSum(int pl, char * payload){

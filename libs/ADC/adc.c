@@ -105,6 +105,7 @@ void settingTestADC(){
 	//writeRegister(MODE2, 0x08); // PGA disabled y 400 SPS
 	//writeRegister(MODE2, 0x88);
 	writeRegister(MODE2, 0x84); // 20 sps
+
 	usleep(10);
 
 	writeRegister(INPMUX, 0x01); // Select AIN0 como AINP Y AIN1 COMO AINN
@@ -128,7 +129,7 @@ void settingADC(){
 
 	//writeRegister(MODE2, 0x08); // PGA disabled y 400 SPS
 	//writeRegister(MODE2, 0x88);
-	writeRegister(MODE2, 0x8F);
+	writeRegister(MODE2, 0x8B);
 	usleep(10);
 
 	writeRegister(INPMUX, 0x23); // Select AIN2 como AINP Y AIN3 COMO AINN

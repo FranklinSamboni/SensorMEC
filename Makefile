@@ -22,10 +22,10 @@ OBJECTSADC =  $(adcdir)adc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 all: SensorIoT
 
 SensorIoT : $(OBJECTS)
-	gcc tests/testGps.c -o tests/testGps $(OBJECTSGPS) -lrt -l json
-	gcc tests/testAdc.c -o tests/testAdc $(OBJECTSADC) -lrt -l json
-	gcc tests/testRtc.c -o tests/testRtc $(OBJECTSRTC) -lrt -l json 
-	gcc $(MAIN) -o SensorIoT $(OBJECTS) -lrt -l json
+	gcc -O0 -g3 -Wall tests/testGps.c -o tests/testGps $(OBJECTSGPS) -lrt -l json
+	gcc -O0 -g3 -Wall tests/testAdc.c -o tests/testAdc $(OBJECTSADC) -lrt -l json
+	gcc -O0 -g3 -Wall tests/testRtc.c -o tests/testRtc $(OBJECTSRTC) -lrt -l json 
+	gcc -O0 -g3 -Wall $(MAIN) -o SensorIoT $(OBJECTS) -lrt -l json
 
 $(jsonfilesdir)filesJ.o : $(jsonfilesdir)filesJ.c $(jsonfilesdir)
 	gcc $(CFLAGS) -o $(jsonfilesdir)filesJ.o -lrt -l json -c $(jsonfilesdir)filesJ.c  
