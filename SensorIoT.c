@@ -665,6 +665,7 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS){
 		}
 
 		sendMsg(UPLOAD_FILES,ADC,dir,1);
+		writeSOCKET("\r\n");
 
 		sprintf(dir,"%s/%s/%s_%c%c_%s.sac",SAMPLES_DIR_R,date,date,time[0],time[1],axis);
 		//sprintf(dir,"%s/%s/%s%s_%c%c%c%c%c%c.sac",SAMPLES_DIR_R,date,axis,date,time[0],time[1],time[2],time[3],time[4],time[5]);
