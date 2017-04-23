@@ -12,6 +12,12 @@
 #include "../GPIO/gpio.h"
 #include "adc.h"
 
+/*
+ * Usar 0x?B o 0x?C en el registro MODE2 del adc para conseguir valores de 200 muestras por segundo.
+ * Usar 0x?9 en el registro MODE2 del adc para conseguir valores de 160 muestras por segundo.
+ * Usar 0x?8 en el registro MODE2 del adc para conseguir valores de 80 muestras por segundo.
+ */
+
 adcStr adc;
 gpioParams pinReset; // para RESET - out
 gpioParams pinStart; // para START - out
