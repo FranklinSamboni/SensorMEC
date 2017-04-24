@@ -54,15 +54,14 @@
 #define BILLION 1000000000L
 
 #define MAX_SPS 200
-#define SPS 200
-#define DT 0.005
 
-//#define SPS 200
-//#define DT 0.005
+int SPS = 0;
+int DT = 0;
 
 char currentDirectoryX[100] = {0};
 char currentDirectoryY[100] = {0};
 char currentDirectoryZ[100] = {0};
+
 
 /*float dt = 0.005 ;
 int npts = 0;
@@ -87,15 +86,43 @@ void sendMsg(char * process, char *component, char * msg, int last);
 void sendSamples(float * samplesX, float * samplesY, float * samplesZ);
 void readWithRTC();
 int readAnalogInputsAndSaveData(char * date, char * time, int isGPS);
-void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS);
+void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int last);
 void writeSac(int npts, int numData, float *arr, float dt, char *axis ,char *filename);
 void initDataofSamples(char * date, char *time, int isGPS);
 void subMuestreo_xxx(float *currentData, float *newData, int factor);
 
-void readDataPrueba(float * dataX, float * dataY, float * dataZ);
-void read_prueba_solo_pps();
-
 int main(int argc, char *argv[]){
+
+
+	if(argc > 1){
+		printf("-%s-\n", argv[1]);
+		SPS = atoi(argv[1]);
+
+		if(SPS != 0){
+			if(SPS == 40 || SPS == 50 || SPS == 100 || SPS == 200 ){
+				DT = 1 / SPS;
+			}
+			else{
+				printf("Opcion incorrecta \n");
+				printf("Disponibles:  \n");
+				printf("40 - 50 - 100 - 200\n");
+				printf("ejemplo: ./SensorIoT 40 \n");
+				exit(0);
+			}
+		}
+		else{
+			printf("Opcion incorrecta \n");
+			printf("Disponibles:  \n");
+			printf("40 - 50 - 100 - 200\n");
+			printf("ejemplo: ./SensorIoT 40 \n");
+			exit(0);
+		}
+	}
+	else{
+		printf("No se ingresaron opciones\n");
+		exit(0);
+	}
+
 
 	openDevices();
 
@@ -188,30 +215,38 @@ void sendSamples(float * samplesX, float * samplesY, float * samplesZ){
 	json_object *jarrayY = json_object_new_array();
 	json_object *jarrayZ = json_object_new_array();
 
-	json_object *jelementsX[SPS] = {0};
-	json_object *jelementsY[SPS] = {0};
-	json_object *jelementsZ[SPS] = {0};
+	json_object *jelementsX[2] = {0};
+	json_object *jelementsY[2] = {0};
+	json_object *jelementsZ[2] = {0};
 
-	float dataX[50] = {0};
+	/*float dataX[50] = {0};
 	float dataY[50] = {0};
-	float dataZ[50] = {0};
+	float dataZ[50] = {0};*/
 	//int factor = MAX_SPS/50;
 
 	//subMuestreo_xxx(samplesX, dataX, factor);
 	//subMuestreo_xxx(samplesY, dataY, factor);
 	//subMuestreo_xxx(samplesZ, dataZ, factor);
 
-	int i = 0;
-	while(i < 2){
-		jelementsX[i] = json_object_new_double(dataX[i]);
-		jelementsY[i] = json_object_new_double(dataY[i]);
-		jelementsZ[i] = json_object_new_double(dataZ[i]);
+	//int i = 0;
+	//while(i < 2){
+		jelementsX[0] = json_object_new_double(samplesX[0]);
+		jelementsY[0] = json_object_new_double(samplesY[0]);
+		jelementsZ[0] = json_object_new_double(samplesZ[0]);
 
-		json_object_array_add(jarrayX,jelementsX[i]);
-		json_object_array_add(jarrayY,jelementsY[i]);
-		json_object_array_add(jarrayZ,jelementsZ[i]);
-		i++;
-	}
+		json_object_array_add(jarrayX,jelementsX[0]);
+		json_object_array_add(jarrayY,jelementsY[0]);
+		json_object_array_add(jarrayZ,jelementsZ[0]);
+
+		jelementsX[1] = json_object_new_double(samplesX[1]);
+		jelementsY[1] = json_object_new_double(samplesY[1]);
+		jelementsZ[1] = json_object_new_double(samplesZ[1]);
+
+		json_object_array_add(jarrayX,jelementsX[1]);
+		json_object_array_add(jarrayY,jelementsY[1]);
+		json_object_array_add(jarrayZ,jelementsZ[1]);
+		//i++;
+	//}
 
 	json_object_object_add(jobj,"type", jtype);
 	json_object_object_add(jobj,"process", jprocess);
@@ -482,7 +517,7 @@ void readAndSaveData(){
 					if(sendNotiPPS == 1){
 						sendNotiPPS = 0;
 						sendNotiSYNC = 1;
-						sendMsg(ALERTS_ERROR,GPS,"Sensor activado con senal PPS",1);
+						sendMsg(ALERTS_ERROR,GPS,"Sensor activado con señal PPS",1);
 					}
 
 					readAnalogInputsAndSaveData(bufDate, bufTime,isGPS);
@@ -541,7 +576,7 @@ void readWithRTC(int * sendNotification){
 	writeI2C(0x0F,0x88);
 
 	if(*sendNotification == 1){
-		sendMsg(ALERTS_ERROR,RTC,"Sensor activado con senal SYNC",1);
+		sendMsg(ALERTS_ERROR,RTC,"Sensor activado con señal SYNC",1);
 		*sendNotification = 0;
 	}
 
@@ -564,9 +599,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	float dataY[MAX_SPS] = {0};
 	float dataZ[MAX_SPS] = {0};
 
-	float samplesX[SPS] = {0};
-	float samplesY[SPS] = {0};
-	float samplesZ[SPS] = {0};
+	float samplesX[MAX_SPS] = {0};
+	float samplesY[MAX_SPS] = {0};
+	float samplesZ[MAX_SPS] = {0};
 
 	int factor =  MAX_SPS/SPS;
 
@@ -574,9 +609,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	//FACTOR_SPS_100 = 4
 	// FACTOR_SPS_50  = 8
 
-	createDirRtc(currentDirectoryX, AXI_X, date, time, isGPS);
-	createDirRtc(currentDirectoryY, AXI_Y, date, time, isGPS);
-	createDirRtc(currentDirectoryZ, AXI_Z, date, time, isGPS);
+	createDirRtc(currentDirectoryX, AXI_X, date, time, isGPS,0);
+	createDirRtc(currentDirectoryY, AXI_Y, date, time, isGPS,0);
+	createDirRtc(currentDirectoryZ, AXI_Z, date, time, isGPS,1);
 
 	int count = 0;
 
@@ -633,11 +668,10 @@ void subMuestreo_xxx(float *currentData, float *newData, int factor){
 
 }
 
-void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS){
+void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int last){
 	char fecha[100] = {0};
 	struct stat st = {0};
 	sprintf(fecha,"%s/%s",SAMPLES_DIR_R,date);
-
 
 	if(dir[0] == 0){
 
@@ -655,7 +689,7 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS){
 
 	}
 	else if (time[2]=='0' && time[3]=='0' && time[4]=='0' && time[5]=='0'){ //Nueva Hora
-
+	//else if (time[4]=='0' && time[5]=='0'){ //Nueva Hora
 		if (stat(SAMPLES_DIR_R, &st) == -1) {
 		    mkdir(SAMPLES_DIR_R, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		}
@@ -664,8 +698,9 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS){
 		    mkdir(fecha, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		}
 
-		sendMsg(UPLOAD_FILES,ADC,dir,1);
-		writeSOCKET("\r\n");
+		if ( last == 1){
+			sendMsg(UPLOAD_FILES,ADC,dir,1);
+		}
 
 		sprintf(dir,"%s/%s/%s_%c%c_%s.sac",SAMPLES_DIR_R,date,date,time[0],time[1],axis);
 		//sprintf(dir,"%s/%s/%s%s_%c%c%c%c%c%c.sac",SAMPLES_DIR_R,date,axis,date,time[0],time[1],time[2],time[3],time[4],time[5]);
