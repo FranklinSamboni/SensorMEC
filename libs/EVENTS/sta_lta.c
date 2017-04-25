@@ -54,8 +54,6 @@ void setParamsSTA_LTA(int freq,  float staSeconds, float ltaSeconds, float thOn,
 
 void sta_lta(){
 
-
-
     wave = fillgaps(wave,'interp'); % replace NaN values using splines
     wave = detrend(wave); % critical to work with detrended data
     y = abs(get(wave,'data')); % Absolute value of time series
