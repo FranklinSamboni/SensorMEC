@@ -56,7 +56,7 @@
 #define MAX_SPS 200
 
 int SPS = 0;
-int DT = 0;
+float DT = 0.0;
 
 char currentDirectoryX[100] = {0};
 char currentDirectoryY[100] = {0};
@@ -100,7 +100,8 @@ int main(int argc, char *argv[]){
 
 		if(SPS != 0){
 			if(SPS == 40 || SPS == 50 || SPS == 100 || SPS == 200 ){
-				DT = 1 / SPS;
+				DT = (float)(1.0 / SPS);
+				printf("dt es : %f \n", DT);
 			}
 			else{
 				printf("Opcion incorrecta \n");
