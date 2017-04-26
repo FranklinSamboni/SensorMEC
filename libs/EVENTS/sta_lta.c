@@ -62,7 +62,7 @@ void setParamsSTA_LTA(int freq,  float staSeconds, int ltaSeconds, float thOn, f
 	params.thOff = thOff;
 	params.minimunDurationSeconds = minimunDurationSeconds;
 	//params.ltaMode = "";
-	//printf();
+	printf("freq %d, lengthSTA %d, lengthLTA %d, thOn %f, thOff %f, minimunDurationSeconds %f", params.freq, params.lengthSTA, params.lengthLTA, params.thOn, params.thOff, params.minimunDurationSeconds);
 }
 
 void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGPS){
@@ -110,7 +110,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 			 */
 			tempData[countLTA_STA] = tempData[countLTA_STA + 1];
 
-			/*  Se agrega la nueva muestra obtenida a la última posición de tempData */
+			/*  Se agrega la nueva muestra obtenida a la ï¿½ltima posiciï¿½n de tempData */
 			tempData[params.lengthLTA -1] = newSamples[count];
 
 			countLTA_STA++;
