@@ -49,7 +49,7 @@ void defaultParams(int freq){
 	params.thOn = 3.0;
 	params.thOff = 1.5;
 	params.minimunDurationSeconds = 2.0;
-	printf("defaultParams - freq %d, lengthSTA %d, lengthLTA %d, thOn %f, thOff %f, minimunDurationSeconds %f", params.freq, params.lengthSTA, params.lengthLTA, params.thOn, params.thOff, params.minimunDurationSeconds);
+	printf("defaultParams - freq %d, lengthSTA %d, lengthLTA %d, thOn %f, thOff %f, minimunDurationSeconds %f\n", params.freq, params.lengthSTA, params.lengthLTA, params.thOn, params.thOff, params.minimunDurationSeconds);
 	//params.ltaMode = "";
 
 }
@@ -63,7 +63,7 @@ void setParamsSTA_LTA(int freq,  float staSeconds, int ltaSeconds, float thOn, f
 	params.thOff = thOff;
 	params.minimunDurationSeconds = minimunDurationSeconds;
 	//params.ltaMode = "";
-	printf("freq %d, lengthSTA %d, lengthLTA %d, thOn %f, thOff %f, minimunDurationSeconds %f", params.freq, params.lengthSTA, params.lengthLTA, params.thOn, params.thOff, params.minimunDurationSeconds);
+	printf("freq %d, lengthSTA %d, lengthLTA %d, thOn %f, thOff %f, minimunDurationSeconds %f\n", params.freq, params.lengthSTA, params.lengthLTA, params.thOn, params.thOff, params.minimunDurationSeconds);
 }
 
 void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGPS){
@@ -77,15 +77,16 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 			 * datos temporales.
 			 */
 			tempData[countTempData] = newSamples[count];
-
+			printf("inicializando tempData valor actual %f - counttempData es : %d\n", tempData[countTempData], countTempData );
 			if(countTempData == (params.lengthLTA - 1)){
+				printf("se llamo a inizializeFirstSamples\n");
 				inizializeFirstSamples(tempData);
 			}
 			countTempData++; // countTempData al final sera igual a params.lengthLTA
 		}
 		else{
 
-			if(countLTA_STA == params.lengthLTA){
+			/*if(countLTA_STA == params.lengthLTA){
 				countLTA_STA = 0;
 			}
 
@@ -94,28 +95,32 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 				lta[0] = lta[params.lengthLTA - 1] + ((newSamples[0] - tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA]
 				sta_to_lta[0] = sta[0] / lta[0];
 				detectEvent(count, newSamples[count],axis,date,time,isGPS);
-			}
+			} ----*/
+
 			/*else if(countLTA_STA == 0 && count != 0){
 				printf("ERROR - EL PARAMETRO DE LTA SECONDS NO PUEDE TENER DECIMALES. EJEM (ltaSeconds = 8.5s) formato incorrecto.")
 			}*/
-			else{
+
+
+			/*---else{
 				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
 				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[0]) / params.lengthLTA);
 				sta_to_lta[countLTA_STA] = sta[countLTA_STA] / lta[countLTA_STA];
 				detectEvent(count, newSamples[count],axis,date,time,isGPS);
-			}
+			}--*/
 
 			/*  Se mueve el buffer tempData una posicion a la izquierda.
 			 *  ( ej. tempData[0] = tempData [1]))
 			 *  	  tempData[1] = tempData [2])) ....
 			 */
-			tempData[countLTA_STA] = tempData[countLTA_STA + 1];
+			//tempData[countLTA_STA] = tempData[countLTA_STA + 1];
 
 			/*  Se agrega la nueva muestra obtenida a la �ltima posici�n de tempData */
-			tempData[params.lengthLTA -1] = newSamples[count];
+			//tempData[params.lengthLTA -1] = newSamples[count];
 
-			countLTA_STA++;
+			//countLTA_STA++;
 		}
+		printf("count staLta %d\n", count);
 		count++;
 	}
 }

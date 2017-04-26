@@ -130,9 +130,9 @@ int main(int argc, char *argv[]){
 
 	//(int freq,  float staSeconds, int ltaSeconds, float thOn, float thOff, float minimunDurationSeconds)
 	defaultParams(SPS);
-	setParamsSTA_LTA(SPS, (float) 0.8, 8,(float) 3.0,(float) 1.5, (float) 3.0);
+	setParamsSTA_LTA(SPS,  0.8, 8, 3.0, 1.5,  3.0);
 
-	printf("se llamo a settingPins\n");
+	/*printf("se llamo a settingPins\n");
 	settingPins(); // Configurar pines de control del ADC
 	printf("se llamo a settingADC\n");
 	settingADC();
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]){
 	printf("se llamo a sincronizarRtc\n");
 	sincronizarRtc();
 	printf("se llamo a checkingSYNC\n");
-	checkingSYNC();
+	checkingSYNC();*/
 
 	readAndSaveData();
 
@@ -637,6 +637,8 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	}
 
 	if(factor != 1){
+		sta_lta(samplesX, AXI_X, date, time,isGPS);
+
 		subMuestreo_xxx(dataX, samplesX, factor);
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
@@ -649,6 +651,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		sendSamples(samplesX,samplesY,samplesZ);
 	}
 	else{
+		sta_lta(dataX, AXI_X, date, time,isGPS);
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
 		writeSac(strDepValues.npts,strDepValues.dataNumber,dataY,strDepValues.dt,AXI_Y,currentDirectoryY);
