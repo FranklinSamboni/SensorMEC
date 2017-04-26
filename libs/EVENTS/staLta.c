@@ -129,9 +129,12 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 
 void inizializeFirstSamples(float * tempData){
 	int count = 0;
-	sta[count] = tempData[count];
-	lta[count] = tempData[count];
+	sta[count] = tempData[count] / params.lengthSTA;
+	lta[count] = tempData[count] / params.lengthSTA;
 	sta_to_lta[count] = sta[count] / lta[count];
+
+	printf("count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
+
 	count++;
 	while(count != params.lengthLTA){
 
@@ -143,8 +146,11 @@ void inizializeFirstSamples(float * tempData){
 		}
 		lta[count] = (tempData[count] + tempData[count - 1]) / params.lengthLTA;
 		sta_to_lta[count] = sta[count] / lta[count];
+		printf("count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
 		count++;
 	}
+
+	printf("count inizializefirstSamples es %d\n", count);
 }
 
 void detectEvent(int count, float sample, char *axis,char * date, char * time , int isGPS){
