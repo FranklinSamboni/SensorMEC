@@ -6,22 +6,12 @@
 
 	struct paramsSTA_LTA {
 		int freq;
-		float staSeconds;
-		float ltaSeconds;
+		int lengthSta;
+		int lengthLta;
 		float thOn;
 		float thOff;
 		float minimunDurationSeconds;
 		char ltaMode[32];
-	};
-
-	struct gpsData {
-		//char gpgga[14][24];
-		//char gprmc[14][24];
-
-		char date[15], time[15];
-		char lat[15], lng[15];
-		char alt[15];
-
 	};
 
 

@@ -969,6 +969,7 @@ int  streql(char *str1, char *str2)
 
 
 void scmxmn(float *x, int npts, float *depmax, float *depmin, float *depmen)
+// Modificado ----- depmax y depmin acumulables ---
 {
 	int i;
 	double sum;
