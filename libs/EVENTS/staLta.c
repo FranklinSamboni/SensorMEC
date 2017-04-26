@@ -87,7 +87,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 		}
 		else{
 
-			/*if(countLTA_STA == params.lengthLTA){
+			if(countLTA_STA == params.lengthLTA){
 				countLTA_STA = 0;
 			}
 
@@ -95,31 +95,34 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 				sta[0] = sta[params.lengthLTA - 1] + ((newSamples[0] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
 				lta[0] = lta[params.lengthLTA - 1] + ((newSamples[0] - tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA]
 				sta_to_lta[0] = sta[0] / lta[0];
-				detectEvent(count, newSamples[count],axis,date,time,isGPS);
-			} ----*/
+				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
+			}
 
 			/*else if(countLTA_STA == 0 && count != 0){
 				printf("ERROR - EL PARAMETRO DE LTA SECONDS NO PUEDE TENER DECIMALES. EJEM (ltaSeconds = 8.5s) formato incorrecto.")
 			}*/
 
 
-			/*---else{
+			else{
 				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
 				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[0]) / params.lengthLTA);
 				sta_to_lta[countLTA_STA] = sta[countLTA_STA] / lta[countLTA_STA];
-				detectEvent(count, newSamples[count],axis,date,time,isGPS);
-			}--*/
+				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
+			}
+
+			printf("count : %d - countLTA_STA: %d - tempData[0] es %f - tempData[1] es %f - sta: %f - lta: %f - sta_to_lta : %f  \n", count,countLTA_STA , tempData[0] , tempData[1], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
 
 			/*  Se mueve el buffer tempData una posicion a la izquierda.
 			 *  ( ej. tempData[0] = tempData [1]))
 			 *  	  tempData[1] = tempData [2])) ....
 			 */
-			//tempData[countLTA_STA] = tempData[countLTA_STA + 1];
+			tempData[countLTA_STA] = tempData[countLTA_STA + 1];
 
 			/*  Se agrega la nueva muestra obtenida a la �ltima posici�n de tempData */
-			//tempData[params.lengthLTA -1] = newSamples[count];
+			tempData[params.lengthLTA -1] = newSamples[count];
 
-			//countLTA_STA++;
+
+			countLTA_STA++;
 		}
 
 		count++;
@@ -133,7 +136,7 @@ void inizializeFirstSamples(float * tempData){
 	lta[count] = tempData[count] / params.lengthSTA;
 	sta_to_lta[count] = sta[count] / lta[count];
 
-	printf("count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
+	printf("inizializa count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
 
 	count++;
 	while(count != params.lengthLTA){
@@ -146,7 +149,7 @@ void inizializeFirstSamples(float * tempData){
 		}
 		lta[count] = (tempData[count] + tempData[count - 1]) / params.lengthLTA;
 		sta_to_lta[count] = sta[count] / lta[count];
-		printf("count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
+		//printf("count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
 		count++;
 	}
 
