@@ -37,6 +37,8 @@ float sta[144000] = {0};
 float lta[144000] = {0};
 float sta_to_lta[144000] = {0};
 
+int countLTA_STA = 0;
+
 int countTempData = 0;
 float tempData[14400] = {0};
 
@@ -69,7 +71,6 @@ void setParamsSTA_LTA(int freq,  float staSeconds, int ltaSeconds, float thOn, f
 void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGPS){
 
 	int count = 0;
-	int countLTA_STA = 0;
 	while(count != params.freq){
 		if(countTempData != (params.lengthLTA)){
 			/* Al comenzar el script se debe inicializar el buffer temporal de los datos y las ventanas
@@ -93,7 +94,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 
 			if(countLTA_STA == 0 && count == 0){
 				sta[0] = sta[params.lengthLTA - 1] + ((newSamples[0] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
-				lta[0] = lta[params.lengthLTA - 1] + ((newSamples[0] - tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA]
+				lta[0] = lta[params.lengthLTA - 1] + ((newSamples[0] - tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA +  count]
 				sta_to_lta[0] = sta[0] / lta[0];
 				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
@@ -104,23 +105,15 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 
 
 			else{
-				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
-				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[0]) / params.lengthLTA);
+				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA + count]) / params.lengthSTA);
+				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[count]) / params.lengthLTA);
 				sta_to_lta[countLTA_STA] = sta[countLTA_STA] / lta[countLTA_STA];
 				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 
-			printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[1]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[1], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
+			printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[40]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[1], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
 
-			/*  Se mueve el buffer tempData una posicion a la izquierda.
-			 *  ( ej. tempData[0] = tempData [1]))
-			 *  	  tempData[1] = tempData [2])) ....
-			 */
-			tempData[countLTA_STA] = tempData[countLTA_STA + 1];
-
-			/*  Se agrega la nueva muestra obtenida a la �ltima posici�n de tempData */
-			tempData[params.lengthLTA -1] = newSamples[count];
-
+			movePositionRegister(newSamples);
 
 			countLTA_STA++;
 		}
@@ -128,6 +121,24 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 		count++;
 	}
 	printf("count staLta es %d\n", count);
+}
+
+void movePositionRegister(float * newSamples){
+
+	/*  Se mueve el buffer tempData una posicion a la izquierda.
+	 *  ( ej. tempData[0] = tempData [1]))
+	 *  	  tempData[1] = tempData [2])) .... y se pasan las nuevas muestras al final del buffer.
+	 */
+
+	int count = 0;
+	int positionOfNewSamples =  params.lengthLTA - params.freq;
+	while (count < params.lengthLTA){
+		tempData[count] = tempData[params.freq + count];
+		if(count >= (params.lengthLTA - params.freq)){
+			tempData[count] = newSamples[count - positionOfNewSamples];
+		}
+		count ++;
+	}
 }
 
 void inizializeFirstSamples(float * tempData){
