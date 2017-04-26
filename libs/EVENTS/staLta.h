@@ -21,6 +21,7 @@
 	void inizializeFirstSamples(float * tempData);
 	void detectEvent(int count, float sample, char * axis, char * date, char * time , int isGPS);
 	void checkMinimunDuration(char * axis, char * date, char * time);
+	void movePositionRegister(float * newSamples);
 	/*void createEventFile(char *axis,char * date, char *time);
 	void initDataofSamples(char * date, char *time, int isGPS);
 	void writeSac(int npts, float *arr, float dt, char *axis, char *filename);*/
