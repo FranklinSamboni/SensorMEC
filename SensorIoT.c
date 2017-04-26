@@ -130,7 +130,7 @@ int main(int argc, char *argv[]){
 
 	//(int freq,  float staSeconds, int ltaSeconds, float thOn, float thOff, float minimunDurationSeconds)
 	defaultParams(SPS);
-	setParamsSTA_LTA(SPS,  0.8, 8, 11.0, 10.0,  3.0);
+	setParamsSTA_LTA(SPS,  0.8, 8, 12.0, 10.0,  3.0);
 
 	printf("se llamo a settingPins\n");
 	settingPins(); // Configurar pines de control del ADC
