@@ -132,12 +132,12 @@ int main(int argc, char *argv[]){
 	defaultParams(SPS);
 	setParamsSTA_LTA(SPS,  0.8, 8, 3.0, 1.5,  3.0);
 
-	/*printf("se llamo a settingPins\n");
+	printf("se llamo a settingPins\n");
 	settingPins(); // Configurar pines de control del ADC
 	printf("se llamo a settingADC\n");
 	settingADC();
 
-	printf("se llamo a loadingGpsData\n");
+	/*printf("se llamo a loadingGpsData\n");
 	loadingGpsData();
 	printf("se llamo a checkingPPS\n");
 	checkingPPS();
