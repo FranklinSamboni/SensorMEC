@@ -77,8 +77,9 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 			 * datos temporales.
 			 */
 			tempData[countTempData] = newSamples[count];
-			printf("inicializando tempData valor actual %f - counttempData es : %d\n", tempData[countTempData], countTempData );
+
 			if(countTempData == (params.lengthLTA - 1)){
+				printf("ultimo valor de tempData %f - counttempData es : %d\n", tempData[countTempData], countTempData );
 				printf("se llamo a inizializeFirstSamples\n");
 				inizializeFirstSamples(tempData);
 			}
@@ -120,9 +121,10 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 
 			//countLTA_STA++;
 		}
-		printf("count staLta %d\n", count);
+
 		count++;
 	}
+	printf("count staLta es %d\n", count);
 }
 
 void inizializeFirstSamples(float * tempData){
