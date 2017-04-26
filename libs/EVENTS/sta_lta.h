@@ -2,7 +2,7 @@
 #ifndef _GPS_H_
 #define _GPS_H_
 
-	#include "../SAC_FILES/sacsubc.h"
+
 	typedef struct paramsSTA_LTA paramsSTA_LTA;
 
 	struct paramsSTA_LTA {
