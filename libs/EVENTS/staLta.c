@@ -49,6 +49,7 @@ void defaultParams(int freq){
 	params.thOn = 3.0;
 	params.thOff = 1.5;
 	params.minimunDurationSeconds = 2.0;
+	printf("defaultParams - freq %d, lengthSTA %d, lengthLTA %d, thOn %f, thOff %f, minimunDurationSeconds %f", params.freq, params.lengthSTA, params.lengthLTA, params.thOn, params.thOff, params.minimunDurationSeconds);
 	//params.ltaMode = "";
 
 }
