@@ -14,7 +14,7 @@ MAIN = SensorIoT.c
 CFLAGS =  -O0 -g3 -Wall -c -fmessage-length=0 
 
 
-OBJECTS = $(jsonfilesdir)filesJ.o $(adcdir)adc.o $(gpsdir)gps.o $(rtcdir)rtc.o $(gpiodir)gpio.o $(sacdir)sacsubc.o  $(socketdir)socketlib.o  $(eventsdir)sta_lta.o
+OBJECTS = $(eventsdir)sta_lta.o $(jsonfilesdir)filesJ.o $(adcdir)adc.o $(gpsdir)gps.o $(rtcdir)rtc.o $(gpiodir)gpio.o $(sacdir)sacsubc.o  $(socketdir)socketlib.o 
 OBJECTSRTC =  $(rtcdir)rtc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 OBJECTSGPS =  $(gpsdir)gps.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 OBJECTSADC =  $(adcdir)adc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o

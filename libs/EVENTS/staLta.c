@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "sta_lta.h"
+#include "staLta.h"
 
 #define EVENTS_DIR_R "/home/debian/Sensor-IOT/SensorIoT/eventos"
 #define MAX_LENGTH_EVENT 144000

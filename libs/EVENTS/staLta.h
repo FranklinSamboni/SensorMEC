@@ -1,6 +1,6 @@
 
-#ifndef _GPS_H_
-#define _GPS_H_
+#ifndef _STALTA_H_
+#define _STALTA_H_
 
 
 	typedef struct paramsSTA_LTA paramsSTA_LTA;
