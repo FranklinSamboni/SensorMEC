@@ -111,7 +111,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 				detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 
-			printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[40]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[40], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
+			//printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[40]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[40], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
 
 			if(count == (params.freq - 1)){
 				moveRegister(newSamples); // desplazar el registro para guardar los nuevos datos temporales.
