@@ -7,13 +7,14 @@ rtcdir = $(lib)RTC/
 gpiodir = $(lib)GPIO/
 socketdir = $(lib)SOCKET/
 jsonfilesdir = $(lib)JSON_FILES/
+eventsdir = $(lib)EVENTS/
 
 MAIN = SensorIoT.c
 
 CFLAGS =  -O0 -g3 -Wall -c -fmessage-length=0 
 
 
-OBJECTS = $(jsonfilesdir)filesJ.o $(adcdir)adc.o $(gpsdir)gps.o $(rtcdir)rtc.o $(gpiodir)gpio.o $(sacdir)sacsubc.o  $(socketdir)socketlib.o
+OBJECTS = $(jsonfilesdir)filesJ.o $(adcdir)adc.o $(gpsdir)gps.o $(rtcdir)rtc.o $(gpiodir)gpio.o $(sacdir)sacsubc.o  $(socketdir)socketlib.o  $(eventsdir)sta_lta.o
 OBJECTSRTC =  $(rtcdir)rtc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 OBJECTSGPS =  $(gpsdir)gps.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 OBJECTSADC =  $(adcdir)adc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
@@ -47,6 +48,9 @@ $(gpiodir)gpio.o : $(gpiodir)gpio.c $(gpiodir)
 	
 $(socketdir)socketlib.o : $(socketdir)socketlib.c $(socketdir)
 	gcc $(CFLAGS) -o $(socketdir)socketlib.o -c $(socketdir)socketlib.c 
+
+$(eventsdir)sta_lta.o : $(eventsdir)sta_lta.c $(eventsdir)
+	gcc $(CFLAGS) -o $(eventsdir)sta_lta.o -c $(eventsdir)sta_lta.c
 
 clean :
 	-rm SensorIoT $(OBJECTS)

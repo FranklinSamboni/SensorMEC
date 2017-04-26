@@ -3,7 +3,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdint.h>
-#include "../SAC_FILE/sacsubc.h"
+#include <time.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "sta_lta.h"
 
 #define EVENTS_DIR_R "/home/debian/Sensor-IOT/SensorIoT/eventos"
 #define MAX_LENGTH_EVENT 144000
@@ -16,7 +21,7 @@ minimunDurationSeconds -> La duracion del disparo debe exceder su valor para ser
 */
 
 paramsSTA_LTA params;
-fullDate startTime;
+//fullDate startTime;
 
 //depValues strDepValues;
 
@@ -24,8 +29,6 @@ int eventNum = 0;
 int EVENT_ON = 0;
 int eventStart=0;
 int eventEnd=0;
-
-float ltaFreezeLevel = 0;
 
 float eventSamples[MAX_LENGTH_EVENT] = {0};
 int countEventSamples = 0;
@@ -36,7 +39,6 @@ float sta_to_lta[144000] = {0};
 
 int countTempData = 0;
 float tempData[14400] = {0};
-float currentSamples [200] = {0};
 
 
 void defaultParams(int freq){
@@ -47,7 +49,7 @@ void defaultParams(int freq){
 	params.thOn = 3.0;
 	params.thOff = 1.5;
 	params.minimunDurationSeconds = 2.0;
-	params.ltaMode = "";
+	//params.ltaMode = "";
 
 }
 
@@ -59,11 +61,11 @@ void setParamsSTA_LTA(int freq,  float staSeconds, int ltaSeconds, float thOn, f
 	params.thOn = thOn;
 	params.thOff = thOff;
 	params.minimunDurationSeconds = minimunDurationSeconds;
-	params.ltaMode = "";
-
+	//params.ltaMode = "";
+	//printf();
 }
 
-void sta_lta(float * newSamples, char * date, char * time, int isGPS){
+void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGPS){
 
 	int count = 0;
 	int countLTA_STA = 0;
@@ -90,7 +92,7 @@ void sta_lta(float * newSamples, char * date, char * time, int isGPS){
 				sta[0] = sta[params.lengthLTA - 1] + ((newSamples[0] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
 				lta[0] = lta[params.lengthLTA - 1] + ((newSamples[0] - tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA]
 				sta_to_lta[0] = sta[0] / lta[0];
-				detectEvent(count, newSamples[count],date,time,isGPS);
+				detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 			/*else if(countLTA_STA == 0 && count != 0){
 				printf("ERROR - EL PARAMETRO DE LTA SECONDS NO PUEDE TENER DECIMALES. EJEM (ltaSeconds = 8.5s) formato incorrecto.")
@@ -99,7 +101,7 @@ void sta_lta(float * newSamples, char * date, char * time, int isGPS){
 				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
 				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[0]) / params.lengthLTA);
 				sta_to_lta[countLTA_STA] = sta[countLTA_STA] / lta[countLTA_STA];
-				detectEvent(count, newSamples[count],date,time,isGPS);
+				detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 
 			/*  Se mueve el buffer tempData una posicion a la izquierda.
@@ -145,7 +147,7 @@ void detectEvent(int count, float sample, char *axis,char * date, char * time , 
 		/*strDepValues.npts = 0;
 		strDepValues.dt = 1 / params.freq;
 		strDepValues.dataNumber = 0;*/
-		initDataofSamples(date,time,isGPS);
+		//initDataofSamples(date,time,isGPS);
 		//eventStart =  count;
 	}
 
@@ -158,7 +160,7 @@ void detectEvent(int count, float sample, char *axis,char * date, char * time , 
 	if(EVENT_ON == 1){
 		if(countEventSamples == MAX_LENGTH_EVENT){
 			EVENT_ON = 0;
-			checkMinimunDuration(time);
+			checkMinimunDuration(axis,date,time);
 			countEventSamples = 0;
 		}else{
 			eventSamples[countEventSamples] = sample;
@@ -192,24 +194,28 @@ void checkMinimunDuration(char *axis,char * date, char *time){
 	seg[0] = time[4];
 	seg[1] = time[5];
 
-	startTime = startTime.hour * 3600 + startTime.min * 60 + startTime.seg;
+	//startTime = startTime.hour * 3600 + startTime.min * 60 + startTime.seg;
 	endTime = atoi(hour) * 3600 + atoi(min) * 60 + atoi(seg);
 
 	if((startTime - endTime) >= params.minimunDurationSeconds){
 		eventNum += 1;
-		printf("Evento %d: de %d/%d/%d %d:%d:%d to date :%s time: %s", eventNum, startTime.year,startTime.month,startTime.day, startTime.hour, startTime.min, startTime.seg,date,time);
-		createEventFile(axis,date,time);
+		//printf("Evento %d: de %d/%d/%d %d:%d:%d to date :%s time: %s", eventNum, startTime.year,startTime.month,startTime.day, startTime.hour, startTime.min, startTime.seg,date,time);
+		//createEventFile(axis,date,time);
 	}
-    startTime.year = 0;
+	countEventSamples = 0;
+
+    /*startTime.year = 0;
 	startTime.month = 0;
 	startTime.day = 0;
 	startTime.hour = 0;
 	startTime.min = 0;
 	startTime.seg = 0;
-	startTime.mseg = 0;
+	startTime.mseg = 0;*/
 
 }
 
+
+/*
 void createEventFile(char *axis,char * date, char *time){
 
 	float dt = 1 / params.freq;
@@ -275,7 +281,7 @@ void initDataofSamples(char * date, char *time, int isGPS){
 	startTime.year = 2000 + atoi(year);
 	startTime.month = atoi(month);
 
-	startTime.day = numeroDiasPorMes[strFullDate.month - 1] + atoi(day);
+	startTime.day = numeroDiasPorMes[startTime.month - 1] + atoi(day);
 
 	startTime.hour = atoi(hour);
 	startTime.min = atoi(min);
@@ -284,23 +290,25 @@ void initDataofSamples(char * date, char *time, int isGPS){
 
 }
 
+
+
 void writeSac(int npts, float *arr, float dt, char *axis, char *filename){
 
         int nerr;
         float b = 0, e = 0, depmax = 0.0, depmin = 0.0, depmen = 0.0;
 
         e = b + (npts -1 )*dt;
-        /* get the extrema of the trace */
+        // get the extrema of the trace
 
         //scmxmn(arr,dataNumber,&strDepValues.depmax,&strDepValues.depmin,&strDepValues.depmen);
         scmxmn(arr,npts,&depmax,&depmin,&depmen);
-        /* create a new header for the new SAC file */
+        // create a new header for the new SAC file
         newhdr();
 
-        /* set some header values */
-        setfhv("DEPMAX", strDepValues.depmax, &nerr);
-        setfhv("DEPMIN", strDepValues.depmin, &nerr);
-        setfhv("DEPMEN", strDepValues.depmen, &nerr);
+        // set some header values
+        setfhv("DEPMAX", depmax, &nerr);
+        setfhv("DEPMIN", depmin, &nerr);
+        setfhv("DEPMEN", depmen, &nerr);
         setnhv("NPTS    ",npts,&nerr);
         setfhv("DELTA   ",dt  ,&nerr);
 
@@ -312,7 +320,7 @@ void writeSac(int npts, float *arr, float dt, char *axis, char *filename){
         setlhv("LOVROK  ",1,&nerr);
         setlhv("LCALDA  ",1,&nerr);
 
-        /* put is a default time for the plot */
+        // put is a default time for the plot
 
         setnhv("NZYEAR", startTime.year, &nerr);
         setnhv("NZJDAY", startTime.day, &nerr);
@@ -328,6 +336,8 @@ void writeSac(int npts, float *arr, float dt, char *axis, char *filename){
 
 }
 
+
+*/
 
 /*
 void teoria(){
