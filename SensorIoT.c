@@ -17,7 +17,7 @@
 #include "libs/SOCKET/socketlib.h"
 #include "libs/SAC_FILES/sacsubc.h"
 #include "libs/JSON_FILES/filesJ.h"
-#include "sta_lta.h"
+#include "libs/EVENTS/sta_lta.h"
 
 /*
  * Directions INPUT, OUTPUT
@@ -127,8 +127,9 @@ int main(int argc, char *argv[]){
 
 
 	openDevices();
+
 	//(int freq,  float staSeconds, int ltaSeconds, float thOn, float thOff, float minimunDurationSeconds)
-	setParamsSTA_LTA(SPS, 0.8, 8, 3, 1.5, 3.0);
+	setParamsSTA_LTA(SPS, 0.8, 8, 3.0, 1.5, 3.0);
 
 	printf("se llamo a settingPins\n");
 	settingPins(); // Configurar pines de control del ADC
