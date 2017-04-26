@@ -110,7 +110,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 
-			printf("count : %d - countLTA_STA: %d - tempData[0] es %f - tempData[1] es %f - sta: %f - lta: %f - sta_to_lta : %f  \n", count,countLTA_STA , tempData[0] , tempData[1], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
+			printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[1]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[1], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
 
 			/*  Se mueve el buffer tempData una posicion a la izquierda.
 			 *  ( ej. tempData[0] = tempData [1]))
