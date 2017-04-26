@@ -96,7 +96,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 				sta[0] = sta[params.lengthLTA - 1] + ((newSamples[0] - tempData[countTempData - params.lengthSTA]) / params.lengthSTA);
 				lta[0] = lta[params.lengthLTA - 1] + ((newSamples[0] - tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA +  count]
 				sta_to_lta[0] = sta[0] / lta[0];
-				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
+				detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 
 			/*else if(countLTA_STA == 0 && count != 0){
@@ -105,10 +105,10 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 
 
 			else{
-				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA + count]) / params.lengthSTA);
-				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[count]) / params.lengthLTA);
+				sta[countLTA_STA] = sta[countLTA_STA - 1] + ((newSamples[count] - tempData[countTempData - params.lengthSTA + count]) / params.lengthSTA );
+				lta[countLTA_STA] = lta[countLTA_STA - 1] + ((newSamples[count] - tempData[count]) / params.lengthLTA ); // tempData[count] = tempData[countTempData - params.lengthLTA +  count]
 				sta_to_lta[countLTA_STA] = sta[countLTA_STA] / lta[countLTA_STA];
-				//detectEvent(count, newSamples[count],axis,date,time,isGPS);
+				detectEvent(count, newSamples[count],axis,date,time,isGPS);
 			}
 
 			printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[40]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[40], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
@@ -174,7 +174,7 @@ void detectEvent(int count, float sample, char *axis,char * date, char * time , 
 
 	if(EVENT_ON == 0 && sta_to_lta[count] >= params.thOn ){
 		EVENT_ON = 1;
-
+		printf("Init Event %d - Sample: %f - sta_to_lta: %f - thOn: %f\n", eventNum,  sample, sta_to_lta[count], params.thOn);
 		/*strDepValues.npts = 0;
 		strDepValues.dt = 1 / params.freq;
 		strDepValues.dataNumber = 0;*/
@@ -184,11 +184,15 @@ void detectEvent(int count, float sample, char *axis,char * date, char * time , 
 
 	if(EVENT_ON == 1 && (sta_to_lta[count] <= params.thOff)){
 		EVENT_ON = 0;
-		checkMinimunDuration(axis,date,time);
+		eventNum += 1;
+		printf("Finish Event %d - Sample: %f - sta_to_lta: %f - thOff: %f\n", eventNum, sample, sta_to_lta[count], params.thOff);
+		//printf("Evento %d  terminom muestra final %f", eventNum, sample);
+
+		//checkMinimunDuration(axis,date,time);
 	}
 
 	//if(EVENT_ON == 1 && count < (params.freq - 1)){
-	if(EVENT_ON == 1){
+	/*if(EVENT_ON == 1){
 		if(countEventSamples == MAX_LENGTH_EVENT){
 			EVENT_ON = 0;
 			checkMinimunDuration(axis,date,time);
@@ -198,7 +202,7 @@ void detectEvent(int count, float sample, char *axis,char * date, char * time , 
 			countEventSamples++;
 		}
 
-	}
+	}*/
 	/*else if (EVENT_ON == 1 && count == ( params.freq - 1)){
 		eventSamples[countEventSamples] = sample;
 		strDepValues.dataNumber = countEventSamples;
