@@ -17,7 +17,7 @@
 #include "libs/SOCKET/socketlib.h"
 #include "libs/SAC_FILES/sacsubc.h"
 #include "libs/JSON_FILES/filesJ.h"
-#include "libs/EVENTS/sta_lta.h"
+#include "sta_lta.h"
 
 /*
  * Directions INPUT, OUTPUT
