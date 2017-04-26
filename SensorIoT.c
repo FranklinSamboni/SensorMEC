@@ -637,11 +637,12 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	}
 
 	if(factor != 1){
-		sta_lta(samplesX, AXI_X, date, time,isGPS);
 
 		subMuestreo_xxx(dataX, samplesX, factor);
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
+
+		sta_lta(samplesX, AXI_X, date, time,isGPS);
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
