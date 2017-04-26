@@ -114,7 +114,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 			printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[40]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count,countLTA_STA , tempData[0] , tempData[1], sta[countLTA_STA], lta[countLTA_STA], sta_to_lta[count]);
 
 			if(count == (params.freq - 1)){
-				movePositionRegister(newSamples); // desplazar el registro para guardar los nuevos datos temporales.
+				moveRegister(newSamples); // desplazar el registro para guardar los nuevos datos temporales.
 			}
 
 			countLTA_STA++;
@@ -125,7 +125,7 @@ void sta_lta(float * newSamples, char * axis, char * date, char * time, int isGP
 	printf("count staLta es %d\n", count);
 }
 
-void movePositionRegister(float * newSamples){
+void moveRegister(float * newSamples){
 
 	/*  Se mueve el buffer tempData una posicion a la izquierda.
 	 *  ( ej. tempData[0] = tempData [1]))
