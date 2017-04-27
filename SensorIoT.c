@@ -45,6 +45,8 @@
 #define BAT "BAT"
 #define WIFI "WIFI"
 
+#define EVENT "EVENT"
+
 #define AXI_X "BH2"
 #define AXI_Y "BH1"
 #define AXI_Z "BHZ"
@@ -52,6 +54,8 @@
 /*-----*/
 
 #define SAMPLES_DIR_R "/home/debian/Sensor-IOT/SensorIoT/muestras"
+#define EVENTS_DIR_R "/home/debian/Sensor-IOT/SensorIoT/eventos"
+
 #define BILLION 1000000000L
 
 #define MAX_SPS 200
@@ -72,6 +76,10 @@ int dataNumber = 200;*/
 fullDate strFullDate;
 depValues strDepValues;
 
+eventData eventX;
+eventData eventY;
+eventData eventZ;
+
 gpioParams gpio68_SYNC; // para RTC
 gpioParams gpio26_PPS; // para GPS
 
@@ -89,8 +97,12 @@ void readWithRTC();
 int readAnalogInputsAndSaveData(char * date, char * time, int isGPS);
 void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int last);
 void writeSac(int npts, int numData, float *arr, float dt, char *axis ,char *filename);
-void initDataofSamples(char * date, char *time, int isGPS);
+void getSacFormatDate(fullDate * strDate,char * date, char *time, int isGPS);
 void subMuestreo_xxx(float *currentData, float *newData, int factor);
+
+void createEventFile(eventData * event);
+void clearFloatBuffer(float * buffer, int ln);
+void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, char *axis, char *filename);
 
 int main(int argc, char *argv[]){
 
@@ -324,7 +336,7 @@ void loadingGpsData(){
 			if(difftime(fin,inicio) > 30.0){
 				if(difftime(fin,inicio) > diff){
 
-					sprintf(msg,"%s","Revisa la conexi�n del GPS, no se ha podido leer el dispositivo UART en mas 30 segundos de ejecuci�n.");
+					sprintf(msg,"%s","Revisa la conexi?n del GPS, no se ha podido leer el dispositivo UART en mas 30 segundos de ejecuci?n.");
 					gpsJson(ERROR_STATUS_COMPONENT,"Venus GPS logger","115200","GGA - RMC",msg);
 
 					sendMsg(ALERTS_ERROR,GPS,msg,1);
@@ -357,7 +369,7 @@ void checkingPPS(){
 			fin = time(NULL);
 			if(difftime(fin,inicio) > 30.0){
 				if(difftime(fin,inicio) > diff){
-					sprintf(msg,"%s","Verifica la conexi�n de la se�al PPS, no se ha podido capturar en mas 30 segundos de ejecuci�n.");
+					sprintf(msg,"%s","Verifica la conexi?n de la se?al PPS, no se ha podido capturar en mas 30 segundos de ejecuci?n.");
 					sendMsg(ALERTS_ERROR,GPS,msg,1);
 					gpsJson(ERROR_STATUS_COMPONENT,"Venus GPS logger","115200","GGA - RMC",msg);
 					sleep(1);
@@ -445,7 +457,7 @@ void checkingSYNC(){
 					break;
 				}
 				else{
-					sprintf(msg,"%s","No se ha podido leer el dispositivo I2C, revisa la conexi�n del RTC.");
+					sprintf(msg,"%s","No se ha podido leer el dispositivo I2C, revisa la conexi?n del RTC.");
 					rtcJson(ERROR_STATUS_COMPONENT,"DS3231","",msg);
 					sendMsg(ALERTS_ERROR,RTC,msg,1);
 					sleep(1);
@@ -458,7 +470,7 @@ void checkingSYNC(){
 			fin = time(NULL);
 			if(difftime(fin,inicio) > 20.0){
 				if(difftime(fin,inicio) > diff){
-					sprintf(msg,"%s","Verifica la conexi�n de SQW (pin de SYNC) del RTC, su lectura ha demorado demasiado.");
+					sprintf(msg,"%s","Verifica la conexi?n de SQW (pin de SYNC) del RTC, su lectura ha demorado demasiado.");
 					rtcJson(ERROR_STATUS_COMPONENT,"DS3231","",msg);
 					sendMsg(ALERTS_ERROR,RTC,msg,1);
 					sleep(1);
@@ -565,7 +577,7 @@ void readAndSaveData(){
 
 void clearBuffer(char * buffer, int ln){
 	int i = 0;
-	while(i < ln){
+	while(i != ln){
 		buffer[i] = 0;
 		i++;
 	}
@@ -642,7 +654,11 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
 
-		sta_lta(samplesX, AXI_X, date, time,isGPS);
+		/*sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+
+		if(eventX.isPendingSaveEvent == 1){
+			createEventFile(&eventX);
+		}*/
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
@@ -652,7 +668,13 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		sendSamples(samplesX,samplesY,samplesZ);
 	}
 	else{
-		sta_lta(dataX, AXI_X, date, time,isGPS);
+
+		/*sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+
+		if(eventX.isPendingSaveEvent == 1){
+			createEventFile(&eventX);
+		}*/
+
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
 		writeSac(strDepValues.npts,strDepValues.dataNumber,dataY,strDepValues.dt,AXI_Y,currentDirectoryY);
@@ -694,7 +716,13 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int 
 		}
 
 		sprintf(dir,"%s/%s/%s_%c%c_%s.sac",SAMPLES_DIR_R,date,date,time[0],time[1],axis);
-		initDataofSamples(date,time,isGPS);
+		getSacFormatDate(&strFullDate,date,time,isGPS);
+		// se reinician el numero de muestras para que comience a contar nuevamente en el siguiente archivo
+		strDepValues.npts = 0;
+		strDepValues.dt = DT;
+		strDepValues.dataNumber = SPS;
+		/// se definene los valores de DELTA, NTPS, y dataNumber que es el numero de datos por segundo
+		// este no se incluye como tal en el archivo.
 		createFile(dir);
 
 	}
@@ -714,14 +742,19 @@ void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int 
 
 		sprintf(dir,"%s/%s/%s_%c%c_%s.sac",SAMPLES_DIR_R,date,date,time[0],time[1],axis);
 		//sprintf(dir,"%s/%s/%s%s_%c%c%c%c%c%c.sac",SAMPLES_DIR_R,date,axis,date,time[0],time[1],time[2],time[3],time[4],time[5]);
-		initDataofSamples(date,time,isGPS);
+		getSacFormatDate(&strFullDate,date,time,isGPS);
+
+		strDepValues.npts = 0;
+		strDepValues.dt = DT;
+		strDepValues.dataNumber = SPS;
+
 		createFile(dir);
 
 	}
 	//printf("Dir: %s\n", dir);
 }
 
-void initDataofSamples(char * date, char *time, int isGPS){
+void getSacFormatDate(fullDate * strDate,char * date, char *time, int isGPS){
 	char year[2] = {0};
 	char month[2] = {0};
 	char day[2] = {0};
@@ -758,22 +791,16 @@ void initDataofSamples(char * date, char *time, int isGPS){
 		mseg[2] = time[9];
 	}
 
-	strFullDate.year = 2000 + atoi(year);
-	strFullDate.month = atoi(month);
+	strDate->year = 2000 + atoi(year);
+	strDate->month = atoi(month);
 
-	strFullDate.day = numeroDiasPorMes[strFullDate.month - 1] + atoi(day);
+	strDate->day = numeroDiasPorMes[strDate->month - 1] + atoi(day);
 
-	strFullDate.hour = atoi(hour);
-	strFullDate.min = atoi(min);
-	strFullDate.seg = atoi(seg);
-	strFullDate.mseg = atoi(mseg);
+	strDate->hour = atoi(hour);
+	strDate->min = atoi(min);
+	strDate->seg = atoi(seg);
+	strDate->mseg = atoi(mseg);
 
-	// se reinician el numero de muestras para que comience a contar nuevamente en el siguiente archivo
-	strDepValues.npts = 0;
-	strDepValues.dt = DT;
-	strDepValues.dataNumber = SPS;
-	/// se definene los valores de DELTA, NTPS, y dataNumber que es el numero de datos por segundo
-	// este no se incluye como tal en el archivo.
 }
 
 void writeSac(int npts, int dataNumber, float *arr, float dt, char *axis ,char *filename)
@@ -821,4 +848,91 @@ void writeSac(int npts, int dataNumber, float *arr, float dt, char *axis ,char *
      	updateData(filename,dataNumber,arr);
 
 }
+
+////////////////////////////////////---------EVENTOS----------////////////////////////////////////
+
+void createEventFile(eventData * event){
+
+	fullDate fullDataEvent;
+	char dir[100] = {0};
+	char fecha[100] = {0};
+	struct stat st = {0};
+	sprintf(fecha,"%s/%s",EVENTS_DIR_R,event->date);
+
+	if (stat(EVENTS_DIR_R, &st) == -1) {
+	    mkdir(EVENTS_DIR_R, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	}
+
+	if (stat(fecha, &st) == -1) {
+	    mkdir(fecha, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	}
+
+	getSacFormatDate(&fullDataEvent,event->date,event->time,event->isGPS);
+
+	sprintf(dir,"%s/%s/%s_%c%c%c%c%c%c_%s.sac",EVENTS_DIR_R,event->date,event->date,event->time[0],event->time[1],event->time[2],event->time[3],event->time[4],event->time[5],event->axis);
+
+	writeEventFile(&fullDataEvent,event->countEventSamples,event->eventSamples,DT,event->axis,dir);
+
+	//AL GUARDAR UN EVENTO SE TIENE QUE LIMPIAR EL REGISTRO DE MUESTRAS.
+
+	clearFloatBuffer(event->eventSamples, event->countEventSamples);
+	event->countEventSamples = 0;
+	event->isPendingSaveEvent = 0;
+
+	sendMsg(UPLOAD_FILES,EVENT,dir,1);
+}
+
+void clearFloatBuffer(float * buffer, int ln){
+	int i = 0;
+	while(i != ln){
+		buffer[i] = 0;
+		i++;
+	}
+}
+
+void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, char *axis, char *filename){
+
+        int nerr;
+        float b = 0, e = 0, depmax = 0.0, depmin = 0.0, depmen = 0.0;
+
+        e = b + (npts -1 )*dt;
+        // get the extrema of the trace
+
+        //scmxmn(arr,dataNumber,&strDepValues.depmax,&strDepValues.depmin,&strDepValues.depmen);
+        scmxmn(arr,npts,&depmax,&depmin,&depmen);
+        // create a new header for the new SAC file
+        newhdr();
+
+        // set some header values
+        setfhv("DEPMAX", depmax, &nerr);
+        setfhv("DEPMIN", depmin, &nerr);
+        setfhv("DEPMEN", depmen, &nerr);
+        setnhv("NPTS    ",npts,&nerr);
+        setfhv("DELTA   ",dt  ,&nerr);
+
+        setfhv("B       ",b  ,&nerr);
+        setihv("IFTYPE  ","ITIME   ",&nerr);
+
+        setfhv("E       ",e     ,&nerr);
+        setlhv("LEVEN   ",1,&nerr);
+        setlhv("LOVROK  ",1,&nerr);
+        setlhv("LCALDA  ",1,&nerr);
+
+        // put is a default time for the plot
+
+        setnhv("NZYEAR", fullDataEvent->year, &nerr);
+        setnhv("NZJDAY", fullDataEvent->day, &nerr);
+     	setnhv("NZHOUR", fullDataEvent->hour, &nerr);
+     	setnhv("NZMIN" , fullDataEvent->min, &nerr);
+     	setnhv("NZSEC" , fullDataEvent->seg, &nerr);
+    	setnhv("NZMSEC", fullDataEvent->mseg, &nerr);
+
+    	setkhv("KNETWK", "MEC",&nerr);
+    	setkhv("KSTNM", "POP",&nerr);
+    	setkhv("KCMPNM", axis,&nerr);
+    	bwsac(npts,filename,arr);
+
+}
+
+
 
