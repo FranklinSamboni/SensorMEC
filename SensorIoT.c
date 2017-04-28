@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <math.h>
 #include "libs/ADC/adc.h"
 #include "libs/GPS/gps.h"
 #include "libs/RTC/rtc.h"
@@ -60,6 +61,7 @@
 
 #define MAX_SPS 200
 
+int flagEvent = 0;
 int SPS = 0;
 float DT = 0.0;
 
@@ -83,6 +85,7 @@ eventData eventZ;
 gpioParams gpio68_SYNC; // para RTC
 gpioParams gpio26_PPS; // para GPS
 
+void printfOpt();
 void openDevices();
 void closeDevices();
 void loadingGpsData();
@@ -106,34 +109,93 @@ void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, ch
 
 int main(int argc, char *argv[]){
 
+	float sta = 0.0;
+	float ltaTemp = 0;
+	int lta = 0;
+	float on = 0.0;
+	float off = 0.0;
+	float min = 0.0;
 
-	if(argc > 1){
-		printf("-%s-\n", argv[1]);
-		SPS = atoi(argv[1]);
+	int c;
+	opterr = 0;
 
-		if(SPS != 0){
-			if(SPS == 40 || SPS == 50 || SPS == 100 || SPS == 200 ){
-				DT = (float)(1.0 / SPS);
-				printf("dt es : %f \n", DT);
-			}
-			else{
-				printf("Opcion incorrecta \n");
-				printf("Disponibles:  \n");
-				printf("40 - 50 - 100 - 200\n");
-				printf("ejemplo: ./SensorIoT 40 \n");
-				exit(0);
-			}
-		}
-		else{
-			printf("Opcion incorrecta \n");
-			printf("Disponibles:  \n");
-			printf("40 - 50 - 100 - 200\n");
-			printf("ejemplo: ./SensorIoT 40 \n");
-			exit(0);
+	while ((c = getopt (argc, argv, "f:vs:l:o:p:m:")) != -1){
+		//printf("%d", c);
+		switch (c)
+		{
+	    case 'f':
+	    	SPS = atoi(optarg);
+	    	break;
+	    case 'v':
+	    	flagEvent = 1;
+	    	break;
+	    case 's':
+	    	sta = atof(optarg);
+	    	break;
+	    case 'l':
+	    	ltaTemp = atof(optarg);
+	    	break;
+	    case 'o':
+	    	on = atof(optarg);
+	    	break;
+	    case 'p':
+	    	off = atof(optarg);
+	    	break;
+	    case 'm':
+	    	min = atof(optarg);
+	    	break;
+	    case '?':
+	    	if (isprint (optopt)){
+	    		fprintf (stderr, "Opción desconocida `-%c'.\n", optopt);
+	    		printfOpt();
+	    	}
+	    	return 1;
+	    default:
+	    	if (isprint (optopt)){
+	    		fprintf (stderr, "Opción desconocida `-%c'.\n", optopt);
+	    		printfOpt();
+	    	}
+	    	return 1;
+	    	break;
 		}
 	}
+
+	if(SPS == 0){
+
+		printfOpt();
+		exit(0);
+	}
+
+	else if(flagEvent == 1){
+		if(sta == 0.0 || ltaTemp == 0 ||  on == 0.0 ||  off == 0.0 ||  min == 0.0){
+			printfOpt();
+			exit(0);
+		}
+		else if( ltaTemp <= sta ){
+			printf("La opción '-s' (segundos STA) debe tener un valor menor que la opción '-l' (segundos LTA).\n");
+			exit(0);
+		}
+		else if(on <= off){
+			printf("La opción '-p' (parador) debe tener un valor menor que la opción '-o' (disparador).\n");
+			exit(0);
+		}
+		else{
+
+			lta = round(ltaTemp);
+			printf("lta segundos redondeado es %d\n", lta);
+
+		}
+
+	}
+
+	if(SPS == 40 || SPS == 50 || SPS == 100 || SPS == 200){
+		DT = (float)(1.0 / SPS);
+		printf("dt es : %f \n", DT);
+	}
+
 	else{
-		printf("No se ingresaron opciones\n");
+		printf("Opciones disponibles '-f 40' '-f 50' '-f 100' '-f 200'\n");
+		printf("ej. './SensorIoT -f 200'\n");
 		exit(0);
 	}
 
@@ -142,7 +204,7 @@ int main(int argc, char *argv[]){
 
 	//(int freq,  float staSeconds, int ltaSeconds, float thOn, float thOff, float minimunDurationSeconds)
 	defaultParams(SPS);
-	setParamsSTA_LTA(SPS,  0.8, 8, 12.0, 10.0,  3.0);
+	setParamsSTA_LTA(SPS,  sta, lta, on, off, min);
 
 	printf("se llamo a settingPins\n");
 	settingPins(); // Configurar pines de control del ADC
@@ -163,6 +225,21 @@ int main(int argc, char *argv[]){
 	closeDevices();
 
 	return 0;
+}
+
+void printfOpt(){
+	printf("La opción '-f' y su argumento es requerido. \nOpciones disponibles '-f 40' '-f 50' '-f 100' '-f 200'\n");
+	printf("ej. './SensorIoT -f 200'\n");
+
+	printf("\n(Opcional)\n");
+	printf("Al activar la opción '-v' (Eventos). Debes ingresar obligatoriamente las opciones:\n");
+	printf("'-s' segundos de la ventana STA				ejm. '-s 0.8'\n");
+	printf("'-l' segundos de la ventana LTA 			emj. '-l 8'\n");
+	printf("'-o' disparador 							emj. '-o 14.0'\n");
+	printf("'-p' parador 								emj. '-p 10.0'\n");
+	printf("'-m' dirección minima de eventos en segundos emj. '-m 3.0'\n");
+
+	printf("\n Ejemplo : './SensorIoT -f 200 -v -s 0.8 -l 8 -o 14.0 -p 10.0 -m 3.0'\n");
 }
 
 void openDevices(){
@@ -660,20 +737,23 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
 
-		sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
-		sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
-		sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);
+		if(flagEvent == 1){
+			sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+			sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
+			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);
 
 
-		if(eventX.isPendingSaveEvent == 1){
-			createEventFile(&eventX);
+			if(eventX.isPendingSaveEvent == 1){
+				createEventFile(&eventX);
+			}
+			if(eventY.isPendingSaveEvent == 1){
+				createEventFile(&eventY);
+			}
+			if(eventZ.isPendingSaveEvent == 1){
+				createEventFile(&eventZ);
+			}
 		}
-		if(eventY.isPendingSaveEvent == 1){
-			createEventFile(&eventY);
-		}
-		if(eventZ.isPendingSaveEvent == 1){
-			createEventFile(&eventZ);
-		}
+
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
@@ -684,20 +764,23 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	}
 	else{
 
-		sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
-		sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
-		sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);
+		if(flagEvent == 1){
+			sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
+			sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
+			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);
 
 
-		if(eventX.isPendingSaveEvent == 1){
-			createEventFile(&eventX);
+			if(eventX.isPendingSaveEvent == 1){
+				createEventFile(&eventX);
+			}
+			if(eventY.isPendingSaveEvent == 1){
+				createEventFile(&eventY);
+			}
+			if(eventZ.isPendingSaveEvent == 1){
+				createEventFile(&eventZ);
+			}
 		}
-		if(eventY.isPendingSaveEvent == 1){
-			createEventFile(&eventY);
-		}
-		if(eventZ.isPendingSaveEvent == 1){
-			createEventFile(&eventZ);
-		}
+
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
