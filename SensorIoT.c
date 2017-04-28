@@ -149,14 +149,14 @@ int main(int argc, char *argv[]){
 	printf("se llamo a settingADC\n");
 	settingADC();
 
-	/*printf("se llamo a loadingGpsData\n");
+	printf("se llamo a loadingGpsData\n");
 	loadingGpsData();
 	printf("se llamo a checkingPPS\n");
 	checkingPPS();
 	printf("se llamo a sincronizarRtc\n");
 	sincronizarRtc();
 	printf("se llamo a checkingSYNC\n");
-	checkingSYNC();*/
+	checkingSYNC();
 
 	readAndSaveData();
 
@@ -632,7 +632,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	createDirRtc(currentDirectoryZ, AXI_Z, date, time, isGPS,1);
 
 	int count = 0;
-
+	/*double voltajeX = 0;
+	double voltajeY = 0;
+	double voltajeZ = 0;*/
 	//printf("Capturando datos ADC\n");
 	while (count != MAX_SPS){
 
@@ -644,6 +646,10 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		dataY[count] = (float) (((unsigned long)recvY[1]<<24)|((unsigned long)recvY[2]<<16)|(recvY[3]<<8)|recvY[4]);
 		dataZ[count] = (float) (((unsigned long)recvZ[1]<<24)|((unsigned long)recvZ[2]<<16)|(recvZ[3]<<8)|recvZ[4]);
 
+		/*voltajeX = getVoltage(recvX,3.4);
+		voltajeY = getVoltage(recvY,3.4);
+		voltajeZ = getVoltage(recvZ,3.4);
+		printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", voltajeX,voltajeY,voltajeZ);*/
 		//printf("Counter: %d\n",count);
 		count++;
 	}
@@ -654,11 +660,20 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
 
-		/*sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+		sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+		sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
+		sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);
+
 
 		if(eventX.isPendingSaveEvent == 1){
 			createEventFile(&eventX);
-		}*/
+		}
+		if(eventY.isPendingSaveEvent == 1){
+			createEventFile(&eventY);
+		}
+		if(eventZ.isPendingSaveEvent == 1){
+			createEventFile(&eventZ);
+		}
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
@@ -669,11 +684,20 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	}
 	else{
 
-		/*sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+		sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
+		sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
+		sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);
+
 
 		if(eventX.isPendingSaveEvent == 1){
 			createEventFile(&eventX);
-		}*/
+		}
+		if(eventY.isPendingSaveEvent == 1){
+			createEventFile(&eventY);
+		}
+		if(eventZ.isPendingSaveEvent == 1){
+			createEventFile(&eventZ);
+		}
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
@@ -871,6 +895,7 @@ void createEventFile(eventData * event){
 
 	sprintf(dir,"%s/%s/%s_%c%c%c%c%c%c_%s.sac",EVENTS_DIR_R,event->date,event->date,event->time[0],event->time[1],event->time[2],event->time[3],event->time[4],event->time[5],event->axis);
 
+	printf("Escribiendo evento %s", dir);
 	writeEventFile(&fullDataEvent,event->countEventSamples,event->eventSamples,DT,event->axis,dir);
 
 	//AL GUARDAR UN EVENTO SE TIENE QUE LIMPIAR EL REGISTRO DE MUESTRAS.

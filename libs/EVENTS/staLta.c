@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <math.h>
 #include "staLta.h"
 
 /*
@@ -59,7 +60,7 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 			event->tempData[event->countTempData] = newSamples[count];
 
 			if(event->countTempData == (params.lengthLTA - 1)){
-				printf("ultimo valor de tempData %f - counttempData es : %d\n", event->tempData[event->countTempData], event->countTempData );
+				printf("Axis : %s - ultimo valor de tempData %f - counttempData es : %d\n", axis, event->tempData[event->countTempData], event->countTempData );
 				printf("se llamo a inizializeFirstSamples\n");
 				inizializeFirstSamples(event);
 			}
@@ -74,7 +75,7 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 			if(event->countLTA_STA == 0 ){
 				event->sta[0] = event->sta[params.lengthLTA - 1] + ((newSamples[count] - event->tempData[event->countTempData - params.lengthSTA]) / params.lengthSTA);
 				event->lta[0] = event->lta[params.lengthLTA - 1] + ((newSamples[count] - event->tempData[0]) / params.lengthLTA); // tempData[0] = tempData[countTempData - params.lengthLTA +  count]
-				event->sta_to_lta[0] = event->sta[0] / event->lta[0];
+				event->sta_to_lta[0] = fabs(event->sta[0] / event->lta[0]);
 				detectEvent(event, newSamples[count],axis,date,time,isGPS);
 			}
 			else{
@@ -86,12 +87,11 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 				}
 
 				event->lta[event->countLTA_STA] = event->lta[event->countLTA_STA - 1] + ((newSamples[count] - event->tempData[count]) / params.lengthLTA ); // tempData[count] = tempData[countTempData - params.lengthLTA +  count]
-				event->sta_to_lta[event->countLTA_STA] = event->sta[event->countLTA_STA] / event->lta[event->countLTA_STA];
+				event->sta_to_lta[event->countLTA_STA] = fabs(event->sta[event->countLTA_STA] / event->lta[event->countLTA_STA]);
 				detectEvent(event, newSamples[count],axis,date,time,isGPS);
 			}
 
-			//printf("count: %d - countLTA_STA: %d - temp[0]: %f - temp[40]: %f - sta: %f - lta: %f - sta_to_lta : %f\n", count, event->countLTA_STA , event->tempData[0] , event->tempData[40], event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
-			printf("count: %d - newSamples: %f - countLTA_STA: %d - sta: %f - lta: %f - sta_to_lta : %f\n", count, newSamples[count] ,event->countLTA_STA, event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
+			//printf("axis %s - count: %d - newSamples: %f - countLTA_STA: %d - sta: %f - lta: %f - sta_to_lta : %f\n",axis, count, newSamples[count] ,event->countLTA_STA, event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
 			if(count == (params.freq - 1)){
 				moveRegister(event->tempData, newSamples); // desplazar el registro para guardar los nuevos datos temporales.
 			}
@@ -101,7 +101,7 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 
 		count++;
 	}
-	printf("count staLta es %d\n", count);
+	//printf("count staLta es %d\n", count);
 }
 
 void moveRegister(float * tempData ,float * newSamples){
@@ -127,7 +127,7 @@ void inizializeFirstSamples(eventData *  event){
 	int count = 0;
 	event->sta[count] = event->tempData[count] / params.lengthSTA;
 	event->lta[count] = event->tempData[count] / params.lengthLTA;
-	event->sta_to_lta[count] = event->sta[count] / event->lta[count];
+	event->sta_to_lta[count] = fabs(event->sta[count] / event->lta[count]);
 
 	printf("inizializa count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, event->sta[count], event->lta[count], event->sta_to_lta[count]);
 
@@ -141,7 +141,7 @@ void inizializeFirstSamples(eventData *  event){
 			event->sta[count] = event->sta[count - 1] + ( (event->tempData[count] - event->tempData[count - params.lengthSTA]) / params.lengthSTA);
 		}
 		event->lta[count] = (event->tempData[count] + event->tempData[count - 1]) / params.lengthLTA;
-		event->sta_to_lta[count] = event->sta[count] / event->lta[count];
+		event->sta_to_lta[count] = fabs(event->sta[count] / event->lta[count]);
 		//printf("count : %d - sta: %f - lta: %f - sta_to_lta : %f \n", count, sta[count], lta[count], sta_to_lta[count]);
 		count++;
 	}
@@ -158,24 +158,24 @@ void detectEvent(eventData *  event, float sample, char *axis,char * date, char 
 			strcpy(event->time,time);
 			strcpy(event->axis,axis);
 			event->isGPS = isGPS;
-			printf("Init Event %d - Sample: %f - sta_to_lta: %f - thOn: %f\n", event->eventNum,  sample, event->sta_to_lta[event->countLTA_STA], params.thOn);
+			printf("Axis %s - Init Event %d - Sample: %f - sta_to_lta: %f - thOn: %f\n",axis, event->eventNum,  sample, event->sta_to_lta[event->countLTA_STA], params.thOn);
 		}
 
 		if(event->EVENT_ON == 1 && (event->sta_to_lta[event->countLTA_STA] <= params.thOff)){
 			event->EVENT_ON = 0;
-			printf("Finish Event %d - Sample: %f - sta_to_lta: %f - thOff: %f\n", event->eventNum, sample, event->sta_to_lta[event->countLTA_STA], params.thOff);
-			//checkMinimunDuration(event, date, time);
+			printf("Axis %s - Finish Event %d - Sample: %f - sta_to_lta: %f - thOff: %f\n",axis, event->eventNum, sample, event->sta_to_lta[event->countLTA_STA], params.thOff);
+			checkMinimunDuration(event, date, time);
 		}
 
 		if(event->EVENT_ON == 1){
 			 //Se añaden las muestras tomadas cuando ocurre un evento a un buffer para luego ser guardadas
-			/*if(event->countEventSamples == MAX_LENGTH_EVENT){
+			if(event->countEventSamples == MAX_LENGTH_EVENT){
 				event->EVENT_ON = 0;
 				checkMinimunDuration(event, date, time);
 			}else{
 				event->eventSamples[event->countEventSamples] = sample;
 				event->countEventSamples++;
-			}*/
+			}
 		}
 	}
 }
@@ -191,9 +191,7 @@ void checkMinimunDuration(eventData *  event, char * date, char *time){
 		event->eventNum += 1;
 		event->isPendingSaveEvent = 1;
 		//printf("Evento %d: de %d/%d/%d %d:%d:%d to date :%s time: %s", eventNum, startTime.year,startTime.month,startTime.day, startTime.hour, startTime.min, startTime.seg,date,time);
-		//createEventFile(axis,date,time);
 	}
-	//countEventSamples = 0;
 }
 
 int getSeconds(char * date, char *time){

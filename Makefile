@@ -28,6 +28,9 @@ SensorIoT : $(OBJECTS)
 	gcc -O0 -g3 -Wall tests/testRtc.c -o tests/testRtc $(OBJECTSRTC) -lrt -l json 
 	gcc -O0 -g3 -Wall $(MAIN) -o SensorIoT $(OBJECTS) -lrt -l json
 
+$(eventsdir)staLta.o : $(eventsdir)staLta.c $(eventsdir)
+	gcc $(CFLAGS) -o $(eventsdir)staLta.o -c $(eventsdir)staLta.c
+
 $(jsonfilesdir)filesJ.o : $(jsonfilesdir)filesJ.c $(jsonfilesdir)
 	gcc $(CFLAGS) -o $(jsonfilesdir)filesJ.o -lrt -l json -c $(jsonfilesdir)filesJ.c  
 
@@ -49,8 +52,7 @@ $(gpiodir)gpio.o : $(gpiodir)gpio.c $(gpiodir)
 $(socketdir)socketlib.o : $(socketdir)socketlib.c $(socketdir)
 	gcc $(CFLAGS) -o $(socketdir)socketlib.o -c $(socketdir)socketlib.c 
 
-$(eventsdir)staLta.o : $(eventsdir)staLta.c $(eventsdir)
-	gcc $(CFLAGS) -o $(eventsdir)staLta.o -c $(eventsdir)staLta.c
+
 
 clean :
 	-rm SensorIoT $(OBJECTS)
