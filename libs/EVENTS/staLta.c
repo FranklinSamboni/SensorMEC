@@ -158,12 +158,12 @@ void detectEvent(eventData *  event, float sample, char *axis,char * date, char 
 			strcpy(event->time,time);
 			strcpy(event->axis,axis);
 			event->isGPS = isGPS;
-			printf("Axis %s - Init Event %d - Sample: %f - sta_to_lta: %f - thOn: %f\n",axis, event->eventNum,  sample, event->sta_to_lta[event->countLTA_STA], params.thOn);
+			printf("Axis %s - count event: %d - Init Event %d - Sample: %f - sta_to_lta: %f - thOn: %f\n",axis, event->countEventSamples, event->eventNum,  sample, event->sta_to_lta[event->countLTA_STA], params.thOn);
 		}
 
 		if(event->EVENT_ON == 1 && (event->sta_to_lta[event->countLTA_STA] <= params.thOff)){
 			event->EVENT_ON = 0;
-			printf("Axis %s - Finish Event %d - Sample: %f - sta_to_lta: %f - thOff: %f\n",axis, event->eventNum, sample, event->sta_to_lta[event->countLTA_STA], params.thOff);
+			printf("Axis %s - count event: %d - Finish Event %d - Sample: %f - sta_to_lta: %f - thOff: %f\n",axis, event->countEventSamples, event->eventNum, sample, event->sta_to_lta[event->countLTA_STA], params.thOff);
 			checkMinimunDuration(event, date, time);
 		}
 
@@ -174,6 +174,7 @@ void detectEvent(eventData *  event, float sample, char *axis,char * date, char 
 				checkMinimunDuration(event, date, time);
 			}else{
 				event->eventSamples[event->countEventSamples] = sample;
+				//printf("axi: %s - count event: %d - sample %lf\n", axis, event->countEventSamples, sample);
 				event->countEventSamples++;
 			}
 		}

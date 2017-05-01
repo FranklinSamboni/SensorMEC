@@ -646,9 +646,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		dataY[count] = (float) (((unsigned long)recvY[1]<<24)|((unsigned long)recvY[2]<<16)|(recvY[3]<<8)|recvY[4]);
 		dataZ[count] = (float) (((unsigned long)recvZ[1]<<24)|((unsigned long)recvZ[2]<<16)|(recvZ[3]<<8)|recvZ[4]);
 
-		/*voltajeX = getVoltage(recvX,3.4);
-		voltajeY = getVoltage(recvY,3.4);
-		voltajeZ = getVoltage(recvZ,3.4);
+		/*voltajeX = getVoltage(recvX,1.8);
+		voltajeY = getVoltage(recvY,1.8);
+		voltajeZ = getVoltage(recvZ,1.8);
 		printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", voltajeX,voltajeY,voltajeZ);*/
 		//printf("Counter: %d\n",count);
 		count++;
