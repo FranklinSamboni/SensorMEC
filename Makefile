@@ -11,7 +11,7 @@ eventsdir = $(lib)EVENTS/
 
 MAIN = SensorIoT.c
 
-CFLAGS =  -O0 -g3 -Wall -c -fmessage-length=0 
+CFLAGS =  -O0 -g3 -Wall -c -fmessage-length=0  -lm
 
 
 OBJECTS = $(eventsdir)staLta.o $(jsonfilesdir)filesJ.o $(adcdir)adc.o $(gpsdir)gps.o $(rtcdir)rtc.o $(gpiodir)gpio.o $(sacdir)sacsubc.o  $(socketdir)socketlib.o 
@@ -23,10 +23,10 @@ OBJECTSADC =  $(adcdir)adc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 all: SensorIoT
 
 SensorIoT : $(OBJECTS)
-	gcc -O0 -g3 -Wall tests/testGps.c -o tests/testGps $(OBJECTSGPS) -lrt -l json
-	gcc -O0 -g3 -Wall tests/testAdc.c -o tests/testAdc $(OBJECTSADC) -lrt -l json
-	gcc -O0 -g3 -Wall tests/testRtc.c -o tests/testRtc $(OBJECTSRTC) -lrt -l json 
-	gcc -O0 -g3 -Wall $(MAIN) -o SensorIoT $(OBJECTS) -lrt -l json
+	gcc -O0 -g3 -Wall tests/testGps.c -o tests/testGps $(OBJECTSGPS) -lrt -l json -lm
+	gcc -O0 -g3 -Wall tests/testAdc.c -o tests/testAdc $(OBJECTSADC) -lrt -l json -lm
+	gcc -O0 -g3 -Wall tests/testRtc.c -o tests/testRtc $(OBJECTSRTC) -lrt -l json -lm
+	gcc -O0 -g3 -Wall $(MAIN) -o SensorIoT $(OBJECTS) -lrt -l json -lm 
 
 $(eventsdir)staLta.o : $(eventsdir)staLta.c $(eventsdir)
 	gcc $(CFLAGS) -o $(eventsdir)staLta.o -c $(eventsdir)staLta.c

@@ -61,9 +61,10 @@
 
 #define MAX_SPS 200
 
-int flagEvent = 0;
 int SPS = 0;
 float DT = 0.0;
+
+int flagEvent = 0;
 
 char currentDirectoryX[100] = {0};
 char currentDirectoryY[100] = {0};
@@ -99,13 +100,13 @@ void sendSamples(float * samplesX, float * samplesY, float * samplesZ);
 void readWithRTC();
 int readAnalogInputsAndSaveData(char * date, char * time, int isGPS);
 void createDirRtc(char *dir, char *axis,char * date, char *time, int isGPS, int last);
-void writeSac(int npts, int numData, float *arr, float dt, char *axis ,char *filename);
+void writeSac(fullDate * strFullDate, depValues * strDepValues, int npts, int dataNumber, float *arr, float dt, char *axis ,char *filename);
 void getSacFormatDate(fullDate * strDate,char * date, char *time, int isGPS);
 void subMuestreo_xxx(float *currentData, float *newData, int factor);
 
 void createEventFile(eventData * event);
 void clearFloatBuffer(float * buffer, int ln);
-void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, char *axis, char *filename);
+//void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, char *axis, char *filename);
 
 int main(int argc, char *argv[]){
 
@@ -115,11 +116,13 @@ int main(int argc, char *argv[]){
 	float on = 0.0;
 	float off = 0.0;
 	float min = 0.0;
+	int preEvent = 0;
+	int postEvent = 0;
 
 	int c;
 	opterr = 0;
 
-	while ((c = getopt (argc, argv, "f:vs:l:o:p:m:")) != -1){
+	while ((c = getopt (argc, argv, "f:vs:l:o:p:m:b:a:")) != -1){
 		//printf("%d", c);
 		switch (c)
 		{
@@ -144,6 +147,12 @@ int main(int argc, char *argv[]){
 	    case 'm':
 	    	min = atof(optarg);
 	    	break;
+	    case 'b':
+	    	preEvent = atoi(optarg);
+	    	break;
+	    case 'a':
+	    	postEvent = atoi(optarg);
+	    	break;
 	    case '?':
 	    	if (isprint (optopt)){
 	    		fprintf (stderr, "Opción desconocida `-%c'.\n", optopt);
@@ -167,7 +176,7 @@ int main(int argc, char *argv[]){
 	}
 
 	else if(flagEvent == 1){
-		if(sta == 0.0 || ltaTemp == 0 ||  on == 0.0 ||  off == 0.0 ||  min == 0.0){
+		if(sta == 0.0 || ltaTemp == 0 ||  on == 0.0 ||  off == 0.0 ||  min == 0.0 || preEvent == 0 || postEvent == 0){
 			printfOpt();
 			exit(0);
 		}
@@ -204,7 +213,9 @@ int main(int argc, char *argv[]){
 
 	//(int freq,  float staSeconds, int ltaSeconds, float thOn, float thOff, float minimunDurationSeconds)
 	defaultParams(SPS);
-	setParamsSTA_LTA(SPS,  sta, lta, on, off, min);
+	if(flagEvent == 1){
+		setParamsSTA_LTA(SPS,  sta, lta, on, off, min,preEvent,postEvent);
+	}
 
 	printf("se llamo a settingPins\n");
 	settingPins(); // Configurar pines de control del ADC
@@ -238,8 +249,10 @@ void printfOpt(){
 	printf("'-o' disparador 							emj. '-o 14.0'\n");
 	printf("'-p' parador 								emj. '-p 10.0'\n");
 	printf("'-m' dirección minima de eventos en segundos emj. '-m 3.0'\n");
+	printf("'-b' duración pre evento en segundos		 emj. '-b 3'\n");
+	printf("'-a' duración post evento en segundos 		emj. '-a 3'\n");
 
-	printf("\n Ejemplo : './SensorIoT -f 200 -v -s 0.8 -l 8 -o 14.0 -p 10.0 -m 3.0'\n");
+	printf("\n Ejemplo : './SensorIoT -f 200 -v -s 0.8 -l 8 -o 14.0 -p 10.0 -m 3.0 -b 3 -a 3'\n");
 }
 
 void openDevices(){
@@ -756,9 +769,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
-		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
-		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesY,strDepValues.dt,AXI_Y,currentDirectoryY);
-		writeSac(strDepValues.npts,strDepValues.dataNumber,samplesZ,strDepValues.dt,AXI_Z,currentDirectoryZ);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesY,strDepValues.dt,AXI_Y,currentDirectoryY);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesZ,strDepValues.dt,AXI_Z,currentDirectoryZ);
 		//printf("Termino camptura de datos ADC factor %d\n", factor);
 		sendSamples(samplesX,samplesY,samplesZ);
 	}
@@ -783,9 +796,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
-		writeSac(strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
-		writeSac(strDepValues.npts,strDepValues.dataNumber,dataY,strDepValues.dt,AXI_Y,currentDirectoryY);
-		writeSac(strDepValues.npts,strDepValues.dataNumber,dataZ,strDepValues.dt,AXI_Z,currentDirectoryZ);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataY,strDepValues.dt,AXI_Y,currentDirectoryY);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataZ,strDepValues.dt,AXI_Z,currentDirectoryZ);
 		//printf("Termino camptura de datos ADC factor %d\n", factor);
 		sendSamples(dataX,dataY,dataZ);
 	}
@@ -910,49 +923,46 @@ void getSacFormatDate(fullDate * strDate,char * date, char *time, int isGPS){
 
 }
 
-void writeSac(int npts, int dataNumber, float *arr, float dt, char *axis ,char *filename)
+void writeSac(fullDate * strFullDa, depValues * strDepVal, int npts, int dataNumber, float *arr, float dt, char *axis ,char *filename)
 {
+	int nerr;
+    float b = 0, e = 0;
 
-        int nerr;
-        float b = 0, e = 0;
+    e = b + (npts -1 )*dt;
+    /* get the extrema of the trace */
 
-        e = b + (npts -1 )*dt;
-        /* get the extrema of the trace */
+    scmxmn(arr,dataNumber,&strDepVal->depmax,&strDepVal->depmin,&strDepVal->depmen);
 
-        scmxmn(arr,dataNumber,&strDepValues.depmax,&strDepValues.depmin,&strDepValues.depmen);
+    /* create a new header for the new SAC file */
+    newhdr();
 
-        /* create a new header for the new SAC file */
-        newhdr();
+    /* set some header values */
+    setfhv("DEPMAX", strDepVal->depmax, &nerr);
+    setfhv("DEPMIN", strDepVal->depmin, &nerr);
+    setfhv("DEPMEN", strDepVal->depmen, &nerr);
+    setnhv("NPTS    ",npts,&nerr);
+    setfhv("DELTA   ",dt  ,&nerr);
 
-        /* set some header values */
-        setfhv("DEPMAX", strDepValues.depmax, &nerr);
-        setfhv("DEPMIN", strDepValues.depmin, &nerr);
-        setfhv("DEPMEN", strDepValues.depmen, &nerr);
-        setnhv("NPTS    ",npts,&nerr);
-        setfhv("DELTA   ",dt  ,&nerr);
+    setfhv("B       ",b  ,&nerr);
+    setihv("IFTYPE  ","ITIME   ",&nerr);
+    setfhv("E       ",e     ,&nerr);
+    setlhv("LEVEN   ",1,&nerr);
+    setlhv("LOVROK  ",1,&nerr);
+    setlhv("LCALDA  ",1,&nerr);
 
-        setfhv("B       ",b  ,&nerr);
-        setihv("IFTYPE  ","ITIME   ",&nerr);
+    /* put is a default time for the plot */
+    setnhv("NZYEAR", strFullDa->year, &nerr);
+    setnhv("NZJDAY", strFullDa->day, &nerr);
+    setnhv("NZHOUR", strFullDa->hour, &nerr);
+    setnhv("NZMIN" , strFullDa->min, &nerr);
+    setnhv("NZSEC" , strFullDa->seg, &nerr);
+    setnhv("NZMSEC", strFullDa->mseg, &nerr);
 
-        setfhv("E       ",e     ,&nerr);
-        setlhv("LEVEN   ",1,&nerr);
-        setlhv("LOVROK  ",1,&nerr);
-        setlhv("LCALDA  ",1,&nerr);
-
-        /* put is a default time for the plot */
-
-        setnhv("NZYEAR", strFullDate.year, &nerr);
-        setnhv("NZJDAY", strFullDate.day, &nerr);
-     	setnhv("NZHOUR", strFullDate.hour, &nerr);
-     	setnhv("NZMIN" , strFullDate.min, &nerr);
-     	setnhv("NZSEC" , strFullDate.seg, &nerr);
-    	setnhv("NZMSEC", strFullDate.mseg, &nerr);
-
-    	setkhv("KNETWK", "MEC",&nerr);
-    	setkhv("KSTNM", "POP",&nerr);
-    	setkhv("KCMPNM", axis,&nerr);
-     	updateHeaders(filename);
-     	updateData(filename,dataNumber,arr);
+    setkhv("KNETWK", "MEC",&nerr);
+    setkhv("KSTNM", "POP",&nerr);
+    setkhv("KCMPNM", axis,&nerr);
+    updateHeaders(filename);
+    updateData(filename,dataNumber,arr);
 
 }
 
@@ -961,6 +971,7 @@ void writeSac(int npts, int dataNumber, float *arr, float dt, char *axis ,char *
 void createEventFile(eventData * event){
 
 	fullDate fullDataEvent;
+	depValues strDepValuesEvents;
 	char dir[100] = {0};
 	char fecha[100] = {0};
 	struct stat st = {0};
@@ -978,12 +989,26 @@ void createEventFile(eventData * event){
 
 	sprintf(dir,"%s/%s/%s_%c%c%c%c%c%c_%s.sac",EVENTS_DIR_R,event->date,event->date,event->time[0],event->time[1],event->time[2],event->time[3],event->time[4],event->time[5],event->axis);
 
-	printf("Escribiendo evento %s", dir);
-	writeEventFile(&fullDataEvent,event->countEventSamples,event->eventSamples,DT,event->axis,dir);
+	printf("Escribiendo evento %s\n", dir);
+
+	createFile(dir);
+
+	strDepValuesEvents.npts = strDepValuesEvents.npts + event->countPreEvent; // Se agrega las muestras del preEvento
+
+	writeSac(&fullDataEvent,&strDepValuesEvents, strDepValuesEvents.npts, event->countPreEvent, event->preEvent, DT,event->axis,dir);
+
+	strDepValuesEvents.npts = strDepValuesEvents.npts + event->countEventSamples; // Se agrega las muestras del evento
+
+	writeSac(&fullDataEvent,&strDepValuesEvents, strDepValuesEvents.npts, event->countEventSamples, event->eventSamples, DT,event->axis,dir);
+
+	strDepValuesEvents.npts = strDepValuesEvents.npts + event->countPostEvent; // se agrega las muestras del postEvento
+
+	writeSac(&fullDataEvent,&strDepValuesEvents, strDepValuesEvents.npts, event->countPostEvent, event->postEvent, DT,event->axis,dir);
 
 	//AL GUARDAR UN EVENTO SE TIENE QUE LIMPIAR EL REGISTRO DE MUESTRAS.
 
 	clearFloatBuffer(event->eventSamples, event->countEventSamples);
+	clearFloatBuffer(event->postEvent, event->countPostEvent);
 	event->countEventSamples = 0;
 	event->isPendingSaveEvent = 0;
 
@@ -998,6 +1023,7 @@ void clearFloatBuffer(float * buffer, int ln){
 	}
 }
 
+/*
 void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, char *axis, char *filename){
 
         int nerr;
@@ -1041,6 +1067,6 @@ void writeEventFile(fullDate * fullDataEvent, int npts, float *arr, float dt, ch
     	bwsac(npts,filename,arr);
 
 }
-
+*/
 
 

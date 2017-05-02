@@ -68,7 +68,7 @@ void wsac1(char *ofile,float *y,int npts,float btime,float dt,int *nerr);
 void scmxmn(float *x, int npts, float *depmax, float *depmin, float *depmen);
 
 void createFile(char *name);
-void updateHeaders();
+void updateHeaders(char *name);
 void updateData(char *name,int LN,float *data);
 
 #endif
