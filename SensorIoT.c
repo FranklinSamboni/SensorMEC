@@ -753,13 +753,14 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		if(flagEvent == 1){
 			sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
 			/*sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
-			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);
+			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);*/
 
 
 			if(eventX.isPendingSaveEvent == 1){
-				createEventFile(&eventX);
+				exit(0);
+				//createEventFile(&eventX);
 			}
-			if(eventY.isPendingSaveEvent == 1){
+			/*if(eventY.isPendingSaveEvent == 1){
 				createEventFile(&eventY);
 			}
 			if(eventZ.isPendingSaveEvent == 1){
@@ -779,13 +780,14 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		if(flagEvent == 1){
 			sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
 			/*sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
-			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);
+			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);*/
 
 
 			if(eventX.isPendingSaveEvent == 1){
-				createEventFile(&eventX);
+				exit(0);
+				//createEventFile(&eventX);
 			}
-			if(eventY.isPendingSaveEvent == 1){
+			/*if(eventY.isPendingSaveEvent == 1){
 				createEventFile(&eventY);
 			}
 			if(eventZ.isPendingSaveEvent == 1){

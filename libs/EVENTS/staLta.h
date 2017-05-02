@@ -60,6 +60,7 @@
 	void moveRegister(float * tempData ,float * newSamples, int samplesNumber, int bufferSize);
 	int getSeconds(char * date, char *time);
 	void setStartTime(int seconds, char * date, char *time);
+	void printfBuff(float * buffer, int ln, char * name);
 	/*void createEventFile(char *axis,char * date, char *time);
 	void initDataofSamples(char * date, char *time, int isGPS);
 	void writeSac(int npts, float *arr, float dt, char *axis, char *filename);*/
