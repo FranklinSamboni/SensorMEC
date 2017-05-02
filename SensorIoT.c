@@ -752,7 +752,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 
 		if(flagEvent == 1){
 			sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
-			sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
+			/*sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
 			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);
 
 
@@ -764,9 +764,8 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 			}
 			if(eventZ.isPendingSaveEvent == 1){
 				createEventFile(&eventZ);
-			}
+			}*/
 		}
-
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
@@ -779,7 +778,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 
 		if(flagEvent == 1){
 			sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
-			sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
+			/*sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
 			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);
 
 
@@ -791,7 +790,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 			}
 			if(eventZ.isPendingSaveEvent == 1){
 				createEventFile(&eventZ);
-			}
+			}*/
 		}
 
 

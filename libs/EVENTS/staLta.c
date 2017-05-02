@@ -101,7 +101,7 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 			}
 
 			//printf("moviendo registro temp[0]: %lf - temp[40]: %lf\n",event->tempData[0], event->tempData[40]);
-			//printf("axis %s - count: %d - newSamples: %f - countLTA_STA: %d - sta: %f - lta: %f - sta_to_lta : %f\n",axis, count, newSamples[count] ,event->countLTA_STA, event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
+			printf("axis %s - count: %d - newSamples: %f - countLTA_STA: %d - sta: %f - lta: %f - sta_to_lta : %f\n",axis, count, newSamples[count] ,event->countLTA_STA, event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
 			if(count == (params.freq - 1)){
 				moveRegister(event->tempData, newSamples,params.freq,params.lengthLTA); // desplazar el registro para guardar los nuevos datos temporales.
 			}
@@ -224,7 +224,7 @@ void detectEvent(eventData *  event, float * newSamples, int countNewSamples, ch
 
 
 			if(event->EVENT_ON == 1){
-				 //Se añaden las muestras tomadas cuando ocurre un evento a un buffer para luego ser guardadas
+				 //Se aï¿½aden las muestras tomadas cuando ocurre un evento a un buffer para luego ser guardadas
 				if(event->countEventSamples == MAX_LENGTH_EVENT){
 					event->EVENT_ON = 0;
 					checkMinimunDuration(event, date, time);
