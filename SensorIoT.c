@@ -228,8 +228,8 @@ int main(int argc, char *argv[]){
 	checkingPPS();
 	printf("se llamo a sincronizarRtc\n");
 	sincronizarRtc();
-	printf("se llamo a checkingSYNC\n");*/
-	checkingSYNC();
+	printf("se llamo a checkingSYNC\n");
+	checkingSYNC();*/
 
 	readAndSaveData();
 
