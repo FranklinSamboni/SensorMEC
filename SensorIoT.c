@@ -222,13 +222,13 @@ int main(int argc, char *argv[]){
 	printf("se llamo a settingADC\n");
 	settingADC();
 
-	printf("se llamo a loadingGpsData\n");
+	/*printf("se llamo a loadingGpsData\n");
 	loadingGpsData();
 	printf("se llamo a checkingPPS\n");
 	checkingPPS();
 	printf("se llamo a sincronizarRtc\n");
 	sincronizarRtc();
-	printf("se llamo a checkingSYNC\n");
+	printf("se llamo a checkingSYNC\n");*/
 	checkingSYNC();
 
 	readAndSaveData();
