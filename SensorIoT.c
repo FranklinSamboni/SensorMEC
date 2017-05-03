@@ -1069,8 +1069,6 @@ void createEventFile(eventData * event){
 
 	sendMsg(UPLOAD_FILES,EVENT,dir,1);
 
-	exit(0);
-	exit(0);
 }
 
 void clearFloatBuffer(float * buffer, int ln){
