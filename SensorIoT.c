@@ -629,7 +629,7 @@ void readAndSaveData(){
 
 		if(getValue(&gpio26_PPS) == HIGH){
 			inicio = time(NULL);
-			printf("\n ----- Senial pps ------- \n");
+			//printf("\n ----- Senial pps ------- \n");
 			//clearBuffer(buf,255);
 			gps = readUART(buf);
 			//printBuffer(gps,buf);
@@ -643,7 +643,7 @@ void readAndSaveData(){
 						getDateGps(bufDate,buf);
 
 						isData = getLat(bufLat,buf);
-						printf("Tiempo: %s - Fecha: %s - Latitud %s\n",bufTime,bufDate,bufLat );
+						//printf("Tiempo: %s - Fecha: %s - Latitud %s\n",bufTime,bufDate,bufLat );
 					}
 					clearBuffer(buf,255);
 					gps = readUART(buf);
