@@ -228,14 +228,14 @@ int main(int argc, char *argv[]){
 	printf("se llamo a testAcelerometer\n");
 	testAcelerometer();
 
-	/*printf("se llamo a loadingGpsData\n");
+	printf("se llamo a loadingGpsData\n");
 	loadingGpsData();
 	printf("se llamo a checkingPPS\n");
 	checkingPPS();
 	printf("se llamo a sincronizarRtc\n");
 	sincronizarRtc();
 	printf("se llamo a checkingSYNC\n");
-	checkingSYNC();*/
+	checkingSYNC();
 
 	readAndSaveData();
 
@@ -629,7 +629,7 @@ void readAndSaveData(){
 
 		if(getValue(&gpio26_PPS) == HIGH){
 			inicio = time(NULL);
-			printf("\n ----- Senial pps ------- \n");
+			//printf("\n ----- Senial pps ------- \n");
 			//clearBuffer(buf,255);
 			gps = readUART(buf);
 			//printBuffer(gps,buf);
@@ -749,9 +749,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	createDirRtc(currentDirectoryZ, AXI_Z, date, time, isGPS,1);
 
 	int count = 0;
-	double voltajeX = 0;
+	/*double voltajeX = 0;
 	double voltajeY = 0;
-	double voltajeZ = 0;
+	double voltajeZ = 0;*/
 	//printf("Capturando datos ADC\n");
 	while (count != MAX_SPS){
 
@@ -763,11 +763,11 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		dataY[count] = (float) (((unsigned long)recvY[1]<<24)|((unsigned long)recvY[2]<<16)|(recvY[3]<<8)|recvY[4]);
 		dataZ[count] = (float) (((unsigned long)recvZ[1]<<24)|((unsigned long)recvZ[2]<<16)|(recvZ[3]<<8)|recvZ[4]);
 
-		voltajeX = getVoltage(recvX,1.8);
+		/*voltajeX = getVoltage(recvX,1.8);
 		voltajeY = getVoltage(recvY,1.8);
-		voltajeZ = getVoltage(recvZ,1.8);
+		voltajeZ = getVoltage(recvZ,1.8);*/
 		//printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", dataX[count],dataY[count],dataZ[count]);
-		printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", voltajeX,voltajeY,voltajeZ);
+		//printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", voltajeX,voltajeY,voltajeZ);
 		//printf("Counter: %d\n",count);
 		count++;
 	}
@@ -778,54 +778,54 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
 
-		//if(flagEvent == 1){
-			//sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
-			/*sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
-			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);*/
+		if(flagEvent == 1){
+			sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+			sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
+			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);
 
 
-			//if(eventX.isPendingSaveEvent == 1){
-			//	createEventFile(&eventX);
-			//}
-			/*if(eventY.isPendingSaveEvent == 1){
+			if(eventX.isPendingSaveEvent == 1){
+				createEventFile(&eventX);
+			}
+			if(eventY.isPendingSaveEvent == 1){
 				createEventFile(&eventY);
 			}
 			if(eventZ.isPendingSaveEvent == 1){
 				createEventFile(&eventZ);
-			}*/
-		//}
+			}
+		}
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
-		/*writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
 		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesY,strDepValues.dt,AXI_Y,currentDirectoryY);
-		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesZ,strDepValues.dt,AXI_Z,currentDirectoryZ);*/
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesZ,strDepValues.dt,AXI_Z,currentDirectoryZ);
 		//printf("Termino camptura de datos ADC factor %d\n", factor);
 		sendSamples(samplesX,samplesY,samplesZ);
 	}
 	else{
 
-		//if(flagEvent == 1){
-			//sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
-			/*sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
+		if(flagEvent == 1){
+			sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
+			sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
 			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);*/
 
 
-			//if(eventX.isPendingSaveEvent == 1){
-			//	createEventFile(&eventX);
-			//}
-			/*if(eventY.isPendingSaveEvent == 1){
+			if(eventX.isPendingSaveEvent == 1){
+				createEventFile(&eventX);
+			}
+			if(eventY.isPendingSaveEvent == 1){
 				createEventFile(&eventY);
 			}
 			if(eventZ.isPendingSaveEvent == 1){
 				createEventFile(&eventZ);
-			}*/
-		//}
+			}
+		}
 
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
-		/*writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataX,strDepValues.dt,AXI_X,currentDirectoryX);
 		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataY,strDepValues.dt,AXI_Y,currentDirectoryY);
-		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataZ,strDepValues.dt,AXI_Z,currentDirectoryZ);*/
+		writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,dataZ,strDepValues.dt,AXI_Z,currentDirectoryZ);
 		//printf("Termino camptura de datos ADC factor %d\n", factor);
 		sendSamples(dataX,dataY,dataZ);
 	}
@@ -960,7 +960,7 @@ void writeSac(fullDate * strFullDa, depValues * strDepVal, int npts, int dataNum
 
     scmxmn(arr,dataNumber,&strDepVal->depmax,&strDepVal->depmin,&strDepVal->depmen);
 
-    printf("npts : %d, dt : %f, depmax : %f, depmin : %f, depmen : %f\n", npts,dt, strDepVal->depmax, strDepVal->depmin, strDepVal->depmen);
+    //printf("npts : %d, dt : %f, depmax : %f, depmin : %f, depmen : %f\n", npts,dt, strDepVal->depmax, strDepVal->depmin, strDepVal->depmen);
     /* create a new header for the new SAC file */
     newhdr();
 
@@ -1017,7 +1017,7 @@ void createEventFile(eventData * event){
 
 	sprintf(dir,"%s/%s/%s_%c%c%c%c%c%c_%s.sac",EVENTS_DIR_R,event->date,event->date,event->time[0],event->time[1],event->time[2],event->time[3],event->time[4],event->time[5],event->axis);
 
-	printf("Escribiendo evento %s\n", dir);
+	//printf("Escribiendo evento %s\n", dir);
 
 	createFile(dir);
 
@@ -1055,11 +1055,11 @@ void createEventFile(eventData * event){
 	}
 
 	int sobrante = event->countEventSamples % SPS;
-	printf("sobrantes es : %d\n", sobrante);
+	//printf("sobrantes es : %d\n", sobrante);
 	addSamplesPreEvent(event,event->tempData,sobrante, (event->countTempData - sobrante));
 
-	printfBuff(event->tempData,(event->countTempData + 10), "des guardar Buf tempData + 10 ");
-	printfBuff(event->preEvent,(event->countPreEvent + 10), "des guardar Buf pre - Event + 10 ");
+	//printfBuff(event->tempData,(event->countTempData + 10), "des guardar Buf tempData + 10 ");
+	//printfBuff(event->preEvent,(event->countPreEvent + 10), "des guardar Buf pre - Event + 10 ");
 
 	clearFloatBuffer(event->eventSamples, event->countEventSamples);
 	clearFloatBuffer(event->postEvent, event->countPostEvent);
