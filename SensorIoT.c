@@ -629,7 +629,7 @@ void readAndSaveData(){
 
 		if(getValue(&gpio26_PPS) == HIGH){
 			inicio = time(NULL);
-			//printf("\n ----- Senial pps ------- \n");
+			printf("\n ----- Senial pps ------- \n");
 			//clearBuffer(buf,255);
 			gps = readUART(buf);
 			//printBuffer(gps,buf);
@@ -643,7 +643,7 @@ void readAndSaveData(){
 						getDateGps(bufDate,buf);
 
 						isData = getLat(bufLat,buf);
-						//printf("Tiempo: %s - Fecha: %s - Latitud %s\n",bufTime,bufDate,bufLat );
+						printf("Tiempo: %s - Fecha: %s - Latitud %s\n",bufTime,bufDate,bufLat );
 					}
 					clearBuffer(buf,255);
 					gps = readUART(buf);
@@ -807,7 +807,7 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		if(flagEvent == 1){
 			sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
 			sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
-			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);*/
+			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);
 
 
 			if(eventX.isPendingSaveEvent == 1){
