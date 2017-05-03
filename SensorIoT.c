@@ -749,9 +749,9 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	createDirRtc(currentDirectoryZ, AXI_Z, date, time, isGPS,1);
 
 	int count = 0;
-	/*double voltajeX = 0;
+	double voltajeX = 0;
 	double voltajeY = 0;
-	double voltajeZ = 0;*/
+	double voltajeZ = 0;
 	//printf("Capturando datos ADC\n");
 	while (count != MAX_SPS){
 
@@ -763,11 +763,11 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		dataY[count] = (float) (((unsigned long)recvY[1]<<24)|((unsigned long)recvY[2]<<16)|(recvY[3]<<8)|recvY[4]);
 		dataZ[count] = (float) (((unsigned long)recvZ[1]<<24)|((unsigned long)recvZ[2]<<16)|(recvZ[3]<<8)|recvZ[4]);
 
-		/*voltajeX = getVoltage(recvX,1.8);
+		voltajeX = getVoltage(recvX,1.8);
 		voltajeY = getVoltage(recvY,1.8);
-		voltajeZ = getVoltage(recvZ,1.8);*/
+		voltajeZ = getVoltage(recvZ,1.8);
 		//printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", dataX[count],dataY[count],dataZ[count]);
-		//printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", voltajeX,voltajeY,voltajeZ);
+		printf("Voltaje X : %lf  - Y: %lf - Z: %lf\n", voltajeX,voltajeY,voltajeZ);
 		//printf("Counter: %d\n",count);
 		count++;
 	}
@@ -778,22 +778,22 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 		subMuestreo_xxx(dataY, samplesY, factor);
 		subMuestreo_xxx(dataZ, samplesZ, factor);
 
-		if(flagEvent == 1){
-			sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
+		//if(flagEvent == 1){
+			//sta_lta(&eventX,samplesX, AXI_X, date, time,isGPS);
 			/*sta_lta(&eventY,samplesY, AXI_Y, date, time,isGPS);
 			sta_lta(&eventZ,samplesZ, AXI_Z, date, time,isGPS);*/
 
 
-			if(eventX.isPendingSaveEvent == 1){
-				createEventFile(&eventX);
-			}
+			//if(eventX.isPendingSaveEvent == 1){
+			//	createEventFile(&eventX);
+			//}
 			/*if(eventY.isPendingSaveEvent == 1){
 				createEventFile(&eventY);
 			}
 			if(eventZ.isPendingSaveEvent == 1){
 				createEventFile(&eventZ);
 			}*/
-		}
+		//}
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
 		/*writeSac(&strFullDate,&strDepValues,strDepValues.npts,strDepValues.dataNumber,samplesX,strDepValues.dt,AXI_X,currentDirectoryX);
@@ -804,22 +804,22 @@ int readAnalogInputsAndSaveData(char * date, char * time, int isGPS){
 	}
 	else{
 
-		if(flagEvent == 1){
-			sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
+		//if(flagEvent == 1){
+			//sta_lta(&eventX,dataX, AXI_X, date, time,isGPS);
 			/*sta_lta(&eventY,dataY, AXI_Y, date, time,isGPS);
 			sta_lta(&eventZ,dataZ, AXI_Z, date, time,isGPS);*/
 
 
-			if(eventX.isPendingSaveEvent == 1){
-				createEventFile(&eventX);
-			}
+			//if(eventX.isPendingSaveEvent == 1){
+			//	createEventFile(&eventX);
+			//}
 			/*if(eventY.isPendingSaveEvent == 1){
 				createEventFile(&eventY);
 			}
 			if(eventZ.isPendingSaveEvent == 1){
 				createEventFile(&eventZ);
 			}*/
-		}
+		//}
 
 
 		strDepValues.npts = strDepValues.npts + strDepValues.dataNumber;
