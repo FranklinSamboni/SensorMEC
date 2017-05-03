@@ -70,7 +70,7 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 			}
 
 			if(count == (params.freq - 1)){
-				addSamplesPreEvent(event,newSamples,params.freq);
+				addSamplesPreEvent(event,newSamples,params.freq, 0);
 			}
 
 			event->countTempData++; // countTempData al final sera igual a params.lengthLTA
@@ -101,9 +101,10 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 			}
 
 			//printf("moviendo registro temp[0]: %lf - temp[40]: %lf\n",event->tempData[0], event->tempData[40]);
-			printf("axis %s - count: %d - newSamples: %f - countLTA_STA: %d - sta: %f - lta: %f - sta_to_lta : %f\n",axis, count, newSamples[count] ,event->countLTA_STA, event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
+
 			if(count == (params.freq - 1)){
-				moveRegister(event->tempData, newSamples,params.freq,params.lengthLTA); // desplazar el registro para guardar los nuevos datos temporales.
+				printf("axis %s - count: %d - newSamples: %f - countLTA_STA: %d - sta: %f - lta: %f - sta_to_lta : %f\n",axis, count, newSamples[count] ,event->countLTA_STA, event->sta[event->countLTA_STA], event->lta[event->countLTA_STA], event->sta_to_lta[event->countLTA_STA]);
+				moveRegister(event->tempData, newSamples,params.freq,params.lengthLTA,0); // desplazar el registro para guardar los nuevos datos temporales.
 			}
 
 			event->countLTA_STA++;
@@ -114,27 +115,27 @@ void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, c
 	//printf("count staLta es %d\n", count);
 }
 
-void addSamplesPreEvent(eventData *  event, float * samples, int samplesNumber){
+void addSamplesPreEvent(eventData *  event, float * samples, int samplesNumber , int firstPosition){
 
 	int count = 0;
 	if(event->countPreEvent != params.preEvent){
 		while(count != samplesNumber){ // inizializar el registro de pre eventos.
 			event->preEvent[event->countPreEvent] = samples[count];
-			printf("count : %d - countPreEvent : %d -  llenando addSamples %lf\n", count,event->countPreEvent, event->preEvent[event->countPreEvent]);
+			//printf("count : %d - countPreEvent : %d -  llenando addSamples %lf\n", count,event->countPreEvent, event->preEvent[event->countPreEvent]);
 			event->countPreEvent++;
 			count++;
 		}
-		printf("\n\n\n");
+		//printf("\n\n\n");
 	}
 	else{
 
-		printf("MOVIENDO addSamples preEvent[0]: %lf - preEvent[40]: %lf\n",event->preEvent[0], event->preEvent[40]);
-		moveRegister(event->preEvent,samples, samplesNumber, event->countPreEvent);
+		//printf("MOVIENDO addSamples preEvent[0]: %lf - preEvent[40]: %lf\n",event->preEvent[0], event->preEvent[40]);
+		moveRegister(event->preEvent,samples, samplesNumber, event->countPreEvent, firstPosition);
 
 	}
 }
 
-void moveRegister(float * tempData ,float * newSamples, int samplesNumber, int bufferSize){
+void moveRegister(float * tempData ,float * newSamples, int samplesNumber, int bufferSize, int firstPosition){
 
 	/*  Se mueve el buffer tempData una posicion a la izquierda.
 	 *  ( ej. tempData[0] = tempData [1]))
@@ -147,9 +148,11 @@ void moveRegister(float * tempData ,float * newSamples, int samplesNumber, int b
 
 	//while (count < params.lengthLTA){
 	while (count < bufferSize){
-		tempData[count] = tempData[samplesNumber + count];
+
 		if(count >= (positionOfNewSamples)){
-			tempData[count] = newSamples[count - positionOfNewSamples];
+			tempData[count] = newSamples[count - positionOfNewSamples + firstPosition];
+		}else{
+			tempData[count] = tempData[samplesNumber + count];
 		}
 		count ++;
 	}
@@ -187,24 +190,24 @@ void detectEvent(eventData *  event, float * newSamples, int countNewSamples, ch
 
 		if(event->isEnableAddPostEvent == 1){
 
-			if(event->countPostEvent != params.postEvent){ // borrar este registro postEvent cuando se haya creado el archivo de los eventos.
+			if(event->countPostEvent != params.postEvent){
+				// borrar este registro postEvent cuando se haya creado el archivo de los eventos  y reiniciar el countPostEvent.
 				printf("count postEvent : %d - llenando post event %lf \n",event->countPostEvent, newSamples[countNewSamples]);
 				event->postEvent[event->countPostEvent] = newSamples[countNewSamples];
 				event->countPostEvent++;
 			}
 			else{
-				event->eventNum += 1;
 				event->isPendingSaveEvent = 1;
 				event->isEnableAddPostEvent = 0;
 
 				printf("TERMINO POST EVENT count postEvent : %d - llenando post event %lf \n",event->countPostEvent, newSamples[countNewSamples]);
 				printf("preEvent count es %d\n", event->countPreEvent);
 
-				printfBuff(event->preEvent,(event->countPreEvent + 10), "Buf pre - Event + 10 ");
-				printfBuff(event->postEvent,(event->countPostEvent + 10), "Buf POST - Event + 10 ");
+				//printfBuff(event->preEvent,(event->countPreEvent + 10), "Buf pre - Event + 10 ");
+				//printfBuff(event->postEvent,(event->countPostEvent + 10), "Buf POST - Event + 10 ");
 
-				printfBuff(event->eventSamples,(event->countEventSamples + 10), "Buf eventSamples + 10 ");
-				printfBuff(event->tempData,(event->countTempData + 10), "Buf tempData + 10 ");
+				//printfBuff(event->eventSamples,(event->countEventSamples + 10), "Buf eventSamples + 10 ");
+				//printfBuff(event->tempData,(event->countTempData + 10), "Buf tempData + 10 ");
 
 			}
 		}
@@ -215,25 +218,40 @@ void detectEvent(eventData *  event, float * newSamples, int countNewSamples, ch
 				strcpy(event->time,time);
 				strcpy(event->axis,axis);
 				event->isGPS = isGPS;
-				addSamplesPreEvent(event,newSamples,countNewSamples);
-				printf("Axis %s - count event: %d - Init Event %d - Sample: %f - sta_to_lta: %f - time %s\n",axis, event->countEventSamples, event->eventNum,  newSamples[countNewSamples], event->sta_to_lta[event->countLTA_STA],time);
+				addSamplesPreEvent(event,newSamples,countNewSamples,0);
+				printf("Axis %s - count event: %d - Init Event %d - Sample: %f - countSamples : %d - sta_to_lta: %f - time %s\n",axis, event->countEventSamples, event->eventNum,  newSamples[countNewSamples], countNewSamples, event->sta_to_lta[event->countLTA_STA],time);
 
-				printfBuff(event->tempData,(event->countTempData + 10), "Buf tempData + 10 ");
-				printfBuff(event->preEvent,(event->countPreEvent + 10), "Buf pre - Event + 10 ");
+				printfBuff(event->tempData,(event->countTempData + 10), "Init Buf tempData + 10 ");
+				printfBuff(event->preEvent,(event->countPreEvent + 10), "Init Buf pre - Event + 10 ");
 			}
 			else{
-				if(countNewSamples == (params.freq - 1)){
-					addSamplesPreEvent(event,newSamples,params.freq);
+				if(countNewSamples == (params.freq - 1) && event->EVENT_ON == 0){
+					addSamplesPreEvent(event,newSamples,params.freq,0);
 				}
 			}
 
 			if(event->EVENT_ON == 1 && (event->sta_to_lta[event->countLTA_STA] <= params.thOff)){
 				event->EVENT_ON = 0;
-				printf("Axis %s - count event: %d - Finish Event %d - Sample: %f - sta_to_lta: %f - time %s\n",axis, event->countEventSamples, event->eventNum, newSamples[countNewSamples], event->sta_to_lta[event->countLTA_STA], time);
+				printf("Axis %s - count event: %d - Finish Event %d - Sample: %f - countSamples : %d - sta_to_lta: %f - time %s\n",axis, event->countEventSamples, event->eventNum, newSamples[countNewSamples], countNewSamples ,event->sta_to_lta[event->countLTA_STA], time);
 
-				checkMinimunDuration(event, date, time);
-				printfBuff(event->tempData,(event->countTempData + 10), "Buf tempData + 10 ");
-				printfBuff(event->preEvent,(event->countPreEvent + 10), "Buf pre - Event + 10 ");
+				if(checkMinimunDuration(event, date, time) == 1){
+					event->isEnableAddPostEvent = 1;
+					event->eventNum += 1;
+				}
+				else{
+					if(event->countEventSamples > event->countPreEvent){
+						//se añaden las muestras que se guardaron en el buffer de eventos a el buffer de pre evento ya que este no duro lo suficiente.
+						addSamplesPreEvent(event,event->eventSamples,event->countPreEvent , (event->countEventSamples - event->countPreEvent));
+					}
+					else{
+						 addSamplesPreEvent(event, event->eventSamples, event->countEventSamples,0);
+					}
+					event->countEventSamples = 0;
+					event->isPendingSaveEvent = 0;
+					event->isEnableAddPostEvent = 0;
+				}
+				printfBuff(event->tempData,(event->countTempData + 10), "Finish Buf tempData + 10 ");
+				printfBuff(event->preEvent,(event->countPreEvent + 10), "Finish Buf pre - Event + 10 ");
 			}
 
 
@@ -247,14 +265,12 @@ void detectEvent(eventData *  event, float * newSamples, int countNewSamples, ch
 					//printf("axi: %s - count event: %d - sample %lf\n", axis, event->countEventSamples, sample);
 					event->countEventSamples++;
 				}
-
-
 			}
 		}
 	}
 }
 
-void checkMinimunDuration(eventData *  event, char * date, char *time){
+int checkMinimunDuration(eventData *  event, char * date, char *time){
 
 	int startTime = 0, endTime = 0;
 
@@ -263,14 +279,18 @@ void checkMinimunDuration(eventData *  event, char * date, char *time){
 
 	if((endTime - startTime) >= params.minimunDurationSeconds){
 
-		event->isEnableAddPostEvent = 1;
 		printf("startTime es: %d, end time es :%d -- preEvent es: %d\n",startTime,endTime,(params.preEvent / params.freq));
 		if(startTime >= (params.preEvent / params.freq)){
 			startTime = startTime - (params.preEvent / params.freq);
 			printf("startTime menos el valor de preEvent %d\n", startTime);
 			setStartTime(startTime, event->date, event->time);
+
 		}
+		return 1;
 		//printf("Evento %d: de %d/%d/%d %d:%d:%d to date :%s time: %s", eventNum, startTime.year,startTime.month,startTime.day, startTime.hour, startTime.min, startTime.seg,date,time);
+	}
+	else{
+		return 0;
 	}
 }
 
@@ -322,7 +342,7 @@ void printfBuff(float * buffer, int ln, char * name){
 	int count = 0;
 	while (count < ln){
 		printf("buffer : %s - count:  %d - valor : % lf\n", name, count, buffer[count]);
-		count++
+		count++;
 	}
 	printf("\n");
 }

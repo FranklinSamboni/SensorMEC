@@ -54,10 +54,10 @@
 	void setParamsSTA_LTA(int freq,  float staSeconds, int ltaSeconds, float thOn, float thOff, int minimunDurationSeconds, int preEvent, int postEvent);
 	void sta_lta(eventData *  event, float * newSamples, char * axis, char * date, char * time, int isGPS);
 	void inizializeFirstSamples(eventData *  event);
-	void addSamplesPreEvent(eventData *  event, float * samples, int samplesNumber);
+	void addSamplesPreEvent(eventData *  event, float * samples, int samplesNumber , int firstPosition);
 	void detectEvent(eventData *  event, float * newSamples, int countNewSamples, char *axis,char * date, char * time , int isGPS);
-	void checkMinimunDuration(eventData *  event, char * date, char *time);
-	void moveRegister(float * tempData ,float * newSamples, int samplesNumber, int bufferSize);
+	int checkMinimunDuration(eventData *  event, char * date, char *time);
+	void moveRegister(float * tempData ,float * newSamples, int samplesNumber, int bufferSize, int firstPosition);
 	int getSeconds(char * date, char *time);
 	void setStartTime(int seconds, char * date, char *time);
 	void printfBuff(float * buffer, int ln, char * name);
