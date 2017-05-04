@@ -18,6 +18,7 @@ OBJECTS = $(eventsdir)staLta.o $(jsonfilesdir)filesJ.o $(adcdir)adc.o $(gpsdir)g
 OBJECTSRTC =  $(rtcdir)rtc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 OBJECTSGPS =  $(gpsdir)gps.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 OBJECTSADC =  $(adcdir)adc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
+OBJECTSACCELEROMETRO =  $(adcdir)adc.o $(gpiodir)gpio.o  $(socketdir)socketlib.o
 
 .PHONY : all clean
 all: SensorIoT
@@ -26,6 +27,7 @@ SensorIoT : $(OBJECTS)
 	gcc -O0 -g3 -Wall tests/testGps.c -o tests/testGps $(OBJECTSGPS) -lrt -l json -lm
 	gcc -O0 -g3 -Wall tests/testAdc.c -o tests/testAdc $(OBJECTSADC) -lrt -l json -lm
 	gcc -O0 -g3 -Wall tests/testRtc.c -o tests/testRtc $(OBJECTSRTC) -lrt -l json -lm
+	gcc -O0 -g3 -Wall tests/testAcelerometro.c -o tests/testAcelerometro $(OBJECTSACCELEROMETRO) -lrt -l json -lm
 	gcc -O0 -g3 -Wall $(MAIN) -o SensorIoT $(OBJECTS) -lrt -l json -lm 
 
 $(eventsdir)staLta.o : $(eventsdir)staLta.c $(eventsdir)
