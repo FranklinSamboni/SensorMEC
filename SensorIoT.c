@@ -999,6 +999,16 @@ void writeSac(fullDate * strFullDa, depValues * strDepVal, int npts, int dataNum
 void createEventFile(eventData * event){
 
 	fullDate fullDataEvent;
+
+	fullDataEvent.year = 0;
+	fullDataEvent.month = 0;
+	fullDataEvent.day = 0;
+	fullDataEvent.hour = 0;
+	fullDataEvent.min = 0;
+	fullDataEvent.seg = 0;
+	fullDataEvent.mseg = 0;
+
+
 	depValues strDepValuesEvents;
 	char dir[100] = {0};
 	char fecha[100] = {0};
